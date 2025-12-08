@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getMythologies, testSupabaseConnection } from '@lib/supabaseQueries'
+import TypingText from '@/components/TypingText'
 import React from 'react'
 
 export const revalidate = 0 // zawsze świeże dane z Supabase (SSR)
@@ -17,9 +18,10 @@ export default async function Home() {
         <h1 className="text-5xl font-runewood tracking-tight text-zinc-900 dark:text-white sm:text-6xl">
           MythChat
         </h1>
-        <p className="max-w-2xl font-Italianno text-5xl text-zinc-600 dark:text-zinc-300">
-          Interaktywna strona internetowa o mitologii integrująca model językowy
-        </p>
+        <TypingText
+          text="Interaktywna strona internetowa o mitologii integrująca model językowy"
+          className="max-w-2xl font-Italianno text-5xl text-zinc-600 dark:text-zinc-300"
+        />
       </div>
 
       <section className="mx-auto flex max-w-5xl flex-col gap-4 px-6 pb-20">
