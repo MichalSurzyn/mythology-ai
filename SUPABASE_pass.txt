@@ -1,0 +1,8 @@
+URL:
+    https://mshvmmynzdffeetyrvvp.supabase.co
+API Key:
+    Publishable:
+        sb_publishable_uep9gCwWdMjIA8vEDJtaqw_weIuW_hM
+
+    Anon:
+        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zaHZtbXluemRmZmVldHlydnZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMDY1MDgsImV4cCI6MjA4MDc4MjUwOH0.3tEzXI1fsZeBFjhJwBQn2yRjSHXwXYADhi46zVmFlj0
