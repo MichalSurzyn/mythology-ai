@@ -19,7 +19,7 @@ export default async function Home() {
           MythChat
         </h1>
         <TypingText
-          text="Interaktywna strona internetowa o mitologii integrująca model językowy"
+          text="Interaktywna strona internetowa o mitologii  integrująca model językowy"
           className="max-w-2xl font-Italianno text-5xl text-zinc-600 dark:text-zinc-300"
         />
       </div>

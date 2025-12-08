@@ -32,6 +32,9 @@ const TypingText: React.FC<TypingTextProps> = ({
     },
   }
 
+  // Zamiana 4 spacji na znacznik <br />
+  const formattedText = text.split('  ')
+
   return (
     <motion.p
       className={className}
@@ -44,17 +47,22 @@ const TypingText: React.FC<TypingTextProps> = ({
         whiteSpace: 'normal', // Umożliwia łamanie linii
       }}
     >
-      {text.split('').map((char, index) => (
-        <motion.span
-          key={index}
-          variants={child}
-          style={{
-            display: 'inline-block',
-            whiteSpace: char === ' ' ? 'pre' : 'normal', // Zachowanie spacji
-          }}
-        >
-          {char}
-        </motion.span>
+      {formattedText.map((segment, index) => (
+        <React.Fragment key={index}>
+          {segment.split('').map((char, charIndex) => (
+            <motion.span
+              key={charIndex}
+              variants={child}
+              style={{
+                display: 'inline-block',
+                whiteSpace: char === ' ' ? 'pre' : 'normal', // Zachowanie spacji
+              }}
+            >
+              {char}
+            </motion.span>
+          ))}
+          {index < formattedText.length - 1 && <br />}
+        </React.Fragment>
       ))}
     </motion.p>
   )
