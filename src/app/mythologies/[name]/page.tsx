@@ -21,47 +21,107 @@ export default async function MythologyPage({ params }: Props) {
   const gods = await getGodsByMythologyId(mythology.id).catch(() => [])
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-6 py-16">
+    <main
+      className="min-h-screen bg-black px-6 py-16"
+      style={
+        {
+          '--accent-color': mythology.theme_color,
+        } as React.CSSProperties
+      }
+    >
       <div className="mx-auto max-w-3xl space-y-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <Link href="/" className="hover:text-[var(--accent-color)]">
+            Strona główna
+          </Link>
+          <span>/</span>
+          <span className="text-gray-300">{mythology.name}</span>
+        </div>
+
+        {/* Header */}
         <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.3em] text-amber-600">
+          <p
+            className="text-sm uppercase tracking-[0.3em]"
+            style={{ color: mythology.theme_color }}
+          >
             MythChat
           </p>
           <h1 className="text-5xl font-semibold text-gray-900 dark:text-white">
             {mythology.name}
           </h1>
+          {mythology.region && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              📍 {mythology.region}
+            </p>
+          )}
         </div>
 
+        {/* Opis */}
         <p className="text-lg leading-7 text-gray-700 dark:text-gray-300">
           {mythology.description || 'Brak opisu dla tej mitologii.'}
         </p>
 
-        {/* Bogowie tej mitologii */}
+        {/* Bogowie */}
         {gods.length > 0 && (
           <section className="mt-12 space-y-4">
             <h2 className="text-3xl font-semibold text-gray-900 dark:text-white">
-              Bogowie
+              Bogowie i Postacie
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {gods.map((god) => (
                 <Link
                   key={god.id}
                   href={`/gods/${encodeURIComponent(god.name)}`}
-                  className="group rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                  className="group rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-lg dark:border-gray-700 dark:bg-black/70"
+                  style={
+                    {
+                      '--god-accent': god.accent_color || mythology.theme_color,
+                    } as React.CSSProperties
+                  }
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-400">
-                    {god.name}
-                  </h3>
-                  {god.title && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {god.title}
-                    </p>
-                  )}
-                  {god.domain && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                      {god.domain}
-                    </p>
-                  )}
+                  <div className="flex items-start gap-3">
+                    {god.avatar_url && (
+                      <img
+                        src={god.avatar_url}
+                        alt={god.name}
+                        className="h-12 w-12 rounded-full object-cover"
+                        style={{
+                          border: `2px solid ${
+                            god.accent_color || mythology.theme_color
+                          }`,
+                        }}
+                      />
+                    )}
+                    <div className="flex-1">
+                      <h3
+                        className="text-lg font-semibold text-gray-900 group-hover:text-[var(--god-accent)] dark:text-white"
+                        style={{ transition: 'color 0.2s' }}
+                      >
+                        {god.name}
+                      </h3>
+                      {god.title && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {god.title}
+                        </p>
+                      )}
+                      {god.domain && (
+                        <p
+                          className="text-xs mt-1"
+                          style={{
+                            color: god.accent_color || mythology.theme_color,
+                          }}
+                        >
+                          {god.domain}
+                        </p>
+                      )}
+                      {god.entity_type && god.entity_type !== 'god' && (
+                        <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                          {god.entity_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>

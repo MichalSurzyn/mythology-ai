@@ -12,7 +12,7 @@ interface SidebarProps {
 
 export function Sidebar({ mythologies }: SidebarProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
-  const [isOpen, setIsOpen] = useState(false) // Kontrola widoczności menu
+  const [isOpen, setIsOpen] = useState(false)
 
   const toggleExpanded = (mythologyId: string) => {
     setExpanded(expanded === mythologyId ? null : mythologyId)
@@ -63,6 +63,11 @@ export function Sidebar({ mythologies }: SidebarProps) {
                           mythology.name
                         )}`}
                         className="flex-1 hover:text-amber-500 px-2 py-2 rounded text-sm font-medium"
+                        style={
+                          {
+                            '--hover-color': mythology.theme_color,
+                          } as React.CSSProperties
+                        }
                       >
                         {mythology.name}
                       </Link>
@@ -94,6 +99,12 @@ export function Sidebar({ mythologies }: SidebarProps) {
                             <Link
                               href={`/gods/${encodeURIComponent(god.name)}`}
                               className="block text-sm hover:text-amber-500 px-2 py-1 rounded"
+                              style={
+                                {
+                                  '--hover-color':
+                                    god.accent_color || mythology.theme_color,
+                                } as React.CSSProperties
+                              }
                             >
                               {god.name}
                               {god.title && (
@@ -115,7 +126,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
         </nav>
       </aside>
 
-      {/* Overlay (kliknięcie poza menu zamyka je) */}
+      {/* Overlay */}
       {isOpen && (
         <div
           onClick={toggleMenu}

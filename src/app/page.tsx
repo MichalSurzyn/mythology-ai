@@ -13,7 +13,7 @@ export default async function Home() {
     <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-white text-zinc-900 dark:from-black dark:to-zinc-950">
       <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-6 px-6 py-24 text-center">
         <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
-          Welcome to
+          Witaj w
         </p>
         <h1 className="text-5xl font-runewood tracking-tight text-zinc-900 dark:text-white sm:text-6xl">
           MythChat
@@ -33,20 +33,28 @@ export default async function Home() {
 
         {mythologies.length === 0 ? (
           <p className="text-sm text-zinc-500">
-            Brak danych w tabeli MYTHOLOGIES.
+            Brak danych w tabeli mythologies.
           </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {mythologies.map(({ name }) => (
+            {mythologies.map(({ id, name, theme_color }) => (
               <Link
-                key={name}
+                key={id}
                 href={`/mythologies/${encodeURIComponent(name)}`}
                 className="group rounded-2xl border border-zinc-200 bg-white/70 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900/70"
+                style={
+                  {
+                    '--accent-color': theme_color,
+                  } as React.CSSProperties
+                }
               >
                 <div className="text-lg font-semibold text-zinc-900 dark:text-white">
                   {name}
                 </div>
-                <span className="text-sm text-zinc-500 group-hover:text-amber-600 dark:text-zinc-400 dark:group-hover:text-amber-400">
+                <span
+                  className="text-sm text-zinc-500 group-hover:text-[var(--accent-color)] dark:text-zinc-400"
+                  style={{ color: 'inherit' }}
+                >
                   Poznaj szczegóły
                 </span>
               </Link>
