@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
-import { getMythologyByName, getGodsByMythologyId } from '@lib/supabaseQueries'
+import { getMythologyByName } from '@lib/supabase/queries/mythologies'
+import { getGodsByMythologyId } from '@lib/supabase/queries/gods'
 import Link from 'next/link'
 import React from 'react'
 
@@ -72,7 +73,9 @@ export default async function MythologyPage({ params }: Props) {
               {gods.map((god) => (
                 <Link
                   key={god.id}
-                  href={`/gods/${encodeURIComponent(god.name)}`}
+                  href={`/mythologies/${name}/gods/${encodeURIComponent(
+                    god.name
+                  )}`}
                   className="group rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-lg dark:border-gray-700 dark:bg-black/70"
                   style={
                     {

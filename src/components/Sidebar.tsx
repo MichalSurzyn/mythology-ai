@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { MythologyWithGods } from '@lib/supabaseQueries'
+import { MythologyWithGods } from '@lib/supabase/queries/types'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import React from 'react'
 
@@ -97,7 +97,9 @@ export function Sidebar({ mythologies }: SidebarProps) {
                         {mythology.gods.map((god) => (
                           <li key={god.id}>
                             <Link
-                              href={`/gods/${encodeURIComponent(god.name)}`}
+                              href={`/mythologies/${encodeURIComponent(
+                                mythology.name
+                              )}/gods/${encodeURIComponent(god.name)}`}
                               className="block text-sm hover:text-amber-500 px-2 py-1 rounded"
                               style={
                                 {

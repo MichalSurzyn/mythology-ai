@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getMythologies, testSupabaseConnection } from '@lib/supabaseQueries'
+import { getMythologies } from '@lib/supabase/queries/mythologies'
+import { testSupabaseConnection } from '@lib/supabase/queries/types'
 import TypingText from '@/components/TypingText'
 import React from 'react'
 

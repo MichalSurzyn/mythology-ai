@@ -1,25 +1,30 @@
 import { notFound } from 'next/navigation'
-import { getGodByName, getMythologyByName } from '@lib/supabaseQueries'
+import { getGodByName } from '@lib/supabase/queries/gods'
+import { getMythologyByName } from '@lib/supabase/queries/mythologies'
 import Link from 'next/link'
 import React from 'react'
 
-type Props = { params: Promise<{ name: string }> }
+type Props = { params: Promise<{ name: string; godname: string }> }
 
 export async function generateMetadata({ params }: Props) {
-  const { name } = await params
-  const decodedName = decodeURIComponent(name)
+  const { godname } = await params
+  const decodedName = decodeURIComponent(godname)
   return { title: `${decodedName} | MythChat` }
 }
 
 export default async function GodPage({ params }: Props) {
-  const { name } = await params
-  const decodedName = decodeURIComponent(name)
-  const god = await getGodByName(decodedName).catch(() => null)
+  const { name, godname } = await params
+  const decodedMythologyName = decodeURIComponent(name)
+  const decodedGodName = decodeURIComponent(godname)
+
+  const god = await getGodByName(decodedGodName).catch(() => null)
 
   if (!god) return notFound()
 
   // Pobierz mitologię dla breadcrumb i kolorów
-  const mythology = await getMythologyByName(god.mythology_id).catch(() => null)
+  const mythology = await getMythologyByName(decodedMythologyName).catch(
+    () => null
+  )
   const accentColor = god.accent_color || mythology?.theme_color || '#FFD700'
 
   return (

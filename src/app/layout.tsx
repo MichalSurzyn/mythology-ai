@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from 'next/font/google'
-import { getMythologiesWithGods } from '@lib/supabaseQueries'
+import { getMythologiesWithGods } from '@lib/supabase/queries/mythologies'
 import { Sidebar } from '@/components/Sidebar'
 import './globals.css'
 import React from 'react'
