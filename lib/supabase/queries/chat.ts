@@ -96,32 +96,3 @@ export async function deleteSession(sessionId: string): Promise<void> {
     throw error
   }
 }
-
-/**
- * Przenieś sesje z localStorage do bazy
- */
-export async function migrateSessions(
-  userId: string,
-  sessions: any[]
-): Promise<void> {
-  const sessionsToInsert = sessions.map((session) => ({
-    user_id: userId,
-    mythology_id: session.mythologyId,
-    god_id: session.godId,
-    session_name: session.godName || session.mythologyName,
-    messages: session.messages,
-    created_at: session.createdAt,
-    last_message_at:
-      session.messages[session.messages.length - 1]?.timestamp ||
-      session.createdAt,
-  }))
-
-  const { error } = await supabase
-    .from('chat_sessions')
-    .insert(sessionsToInsert)
-
-  if (error) {
-    console.error('Error migrating sessions:', error)
-    throw error
-  }
-}

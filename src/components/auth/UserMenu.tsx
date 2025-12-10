@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@lib/hooks/useAuth'
 import { motion } from 'framer-motion'
 import { User as UserIcon, History, LogOut } from 'lucide-react'
@@ -14,6 +15,7 @@ interface UserMenuProps {
 
 export default function UserMenu({ user, onClose }: UserMenuProps) {
   const { signOut } = useAuth()
+  const router = useRouter()
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Zamknij przy kliknięciu poza menu
@@ -31,6 +33,9 @@ export default function UserMenu({ user, onClose }: UserMenuProps) {
   const handleSignOut = async () => {
     await signOut()
     onClose()
+    // Przekieruj na landing page
+    router.push('/')
+    router.refresh()
   }
 
   return (

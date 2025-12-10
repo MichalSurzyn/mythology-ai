@@ -11,7 +11,7 @@ type RateLimitData = {
 export function checkRateLimit(isLoggedIn: boolean): boolean {
   if (typeof window === 'undefined') return false
 
-  const limit = isLoggedIn ? 2 : 1 // Zalogowani: 2/min, Goście: 1/min
+  const limit = isLoggedIn ? 3 : 2 // Zalogowani: 3/min, Goście: 2/min
   const windowMs = 60 * 1000 // 1 minuta
 
   try {

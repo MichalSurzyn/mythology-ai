@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@lib/hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, AlertCircle } from 'lucide-react'
@@ -13,6 +14,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const { signIn, signUp } = useAuth()
+  const router = useRouter()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,6 +38,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose()
         setEmail('')
         setPassword('')
+        // Przekieruj na landing page
+        router.push('/')
+        router.refresh()
       }
     } catch (err: any) {
       setError(err.message || 'Wystąpił błąd')

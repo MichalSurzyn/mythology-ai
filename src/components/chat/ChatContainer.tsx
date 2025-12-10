@@ -6,16 +6,11 @@ import ChatHeader from './ChatHeader'
 import MessagesArea from './MessagesArea'
 import ChatInput from './ChatInput'
 import { useAuth } from '@lib/hooks/useAuth'
-import {
-  getSession,
-  saveSession,
-  getAllSessions,
-} from '@lib/utils/localStorage'
+import { getSession, saveSession } from '@lib/utils/localStorage'
 import {
   getUserSessions,
   createSession,
   updateSession,
-  migrateSessions,
 } from '@lib/supabase/queries/chat'
 import { getMythologyById } from '@lib/supabase/queries/mythologies'
 import { getGodById } from '@lib/supabase/queries/gods'
@@ -59,32 +54,18 @@ export default function ChatContainer({
   const [session, setSession] = useState<ChatSession | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [hasMigrated, setHasMigrated] = useState(false)
   const initialQuerySent = useRef(false)
-
-  // Migracja sesji po zalogowaniu
-  useEffect(() => {
-    async function migrate() {
-      if (user && !hasMigrated) {
-        try {
-          const localSessions = getAllSessions()
-          if (localSessions.length > 0) {
-            await migrateSessions(user.id, localSessions)
-            localStorage.removeItem('mythchat_sessions')
-            setHasMigrated(true)
-          }
-        } catch (error) {
-          console.error('Migration error:', error)
-        }
-      }
-    }
-    migrate()
-  }, [user, hasMigrated])
 
   // Załaduj lub stwórz sesję
   useEffect(() => {
     async function loadSession() {
-      if (!mythologyId) return
+      // spróbuj wyciągnąć ID z paramu, albo z samego sessionId (<mythId>_<godId|mythology>)
+      const [parsedMythId, parsedGodIdRaw] = sessionId.split('_')
+      const parsedGodId =
+        parsedGodIdRaw && parsedGodIdRaw !== 'mythology' ? parsedGodIdRaw : null
+
+      let mythologyIdToUse = mythologyId ?? parsedMythId
+      let godIdToUse = godId ?? parsedGodId
 
       try {
         // Sprawdź czy sesja istnieje
@@ -94,12 +75,16 @@ export default function ChatContainer({
           const dbSessions = await getUserSessions(user.id)
           const found = dbSessions.find((s) => s.id === sessionId)
           if (found) {
-            const mythology = await getMythologyById(found.mythology_id)
+            mythologyIdToUse = mythologyIdToUse ?? found.mythology_id
+            godIdToUse = godIdToUse ?? found.god_id ?? null
+            const mythology = mythologyIdToUse
+              ? await getMythologyById(mythologyIdToUse)
+              : null
             const god = found.god_id ? await getGodById(found.god_id) : null
 
             existingSession = {
               id: found.id,
-              mythologyId: found.mythology_id,
+              mythologyId: mythologyIdToUse || found.mythology_id,
               mythologyName: mythology?.name || 'Mitologia',
               godId: found.god_id,
               godName: god?.name || null,
@@ -111,6 +96,8 @@ export default function ChatContainer({
           const localSession = getSession(sessionId)
           if (localSession) {
             existingSession = localSession
+            mythologyIdToUse = mythologyIdToUse ?? localSession.mythologyId
+            godIdToUse = godIdToUse ?? localSession.godId ?? null
           }
         }
 
@@ -120,15 +107,21 @@ export default function ChatContainer({
           return
         }
 
+        if (!mythologyIdToUse) {
+          setError('Nie udało się odnaleźć sesji. Wróć do wyboru mitologii.')
+          router.replace('/')
+          return
+        }
+
         // Nowa sesja
-        const mythology = await getMythologyById(mythologyId)
-        const god = godId ? await getGodById(godId) : null
+        const mythology = await getMythologyById(mythologyIdToUse)
+        const god = godIdToUse ? await getGodById(godIdToUse) : null
 
         const newSession: ChatSession = {
           id: sessionId,
-          mythologyId: mythologyId,
+          mythologyId: mythologyIdToUse,
           mythologyName: mythology?.name || 'Mitologia',
-          godId: godId || null,
+          godId: godIdToUse || null,
           godName: god?.name || null,
           messages: [],
           createdAt: new Date().toISOString(),
@@ -271,8 +264,8 @@ export default function ChatContainer({
 
   return (
     <div className="flex h-screen flex-col bg-black">
-      {/* Sticky Header */}
-      <ChatHeader title={session.godName || session.mythologyName} />
+      {/* Sticky Header
+      <ChatHeader title={session.godName || session.mythologyName} /> */}
 
       {/* Messages Area - zajmuje całą dostępną przestrzeń */}
       <MessagesArea
