@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { MythologyWithGods } from '@lib/supabase/queries/types'
 import { ChevronDown, Menu, X, History, Trash2 } from 'lucide-react'
@@ -20,22 +21,20 @@ interface SidebarProps {
 }
 
 export function Sidebar({ mythologies }: SidebarProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [chatSessions, setChatSessions] = useState<any[]>([])
   const { user } = useAuth()
 
-  // Załaduj sesje
   useEffect(() => {
     loadSessions()
   }, [user])
 
   const loadSessions = async () => {
     if (user) {
-      // Zalogowany - pobierz z bazy
       try {
         const sessions = await getUserSessions(user.id)
-        // Filtruj sesje z pustymi messages (to były tylko inicjalizacje)
         const validSessions = sessions.filter(
           (s) => s.messages && s.messages.length > 0
         )
@@ -44,9 +43,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
         console.error('Error loading sessions:', error)
       }
     } else {
-      // Gość - pobierz z localStorage
       const sessions = getAllSessions()
-      // Filtruj sesje z pustymi messages
       const validSessions = sessions.filter(
         (s) => s.messages && s.messages.length > 0
       )
@@ -63,18 +60,16 @@ export function Sidebar({ mythologies }: SidebarProps) {
   }
 
   const handleLoadSession = (session: any) => {
-    // Wywołaj funkcję z ChatInterface (przez window)
-    if (typeof window !== 'undefined' && (window as any).loadChatSession) {
-      ;(window as any).loadChatSession(session)
-      setIsOpen(false) // Zamknij sidebar po załadowaniu
-    }
+    // Przekieruj do /chat/[sessionId]
+    router.push(`/chat/${session.id}`)
+    setIsOpen(false)
   }
 
   const handleDeleteSession = async (
     sessionId: string,
     e: React.MouseEvent
   ) => {
-    e.stopPropagation() // Nie wywołuj loadSession przy usuwaniu
+    e.stopPropagation()
 
     try {
       if (user) {
@@ -82,8 +77,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
       } else {
         deleteLocalSession(sessionId)
       }
-
-      // Odśwież listę
       loadSessions()
     } catch (error) {
       console.error('Error deleting session:', error)
@@ -92,10 +85,10 @@ export function Sidebar({ mythologies }: SidebarProps) {
 
   return (
     <>
-      {/* Ikona hamburgera */}
+      {/* Hamburger */}
       <button
         onClick={toggleMenu}
-        className="fixed left-4 top-4 z-50 rounded-md bg-black p-2 text-white shadow-md hover:font-bold"
+        className="fixed left-4 top-4 z-50 rounded-md bg-black p-2 text-white shadow-md hover:bg-zinc-800"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -132,11 +125,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
                           mythology.name
                         )}`}
                         className="flex-1 rounded px-2 py-2 text-sm font-medium hover:text-amber-500"
-                        style={
-                          {
-                            '--hover-color': mythology.theme_color,
-                          } as React.CSSProperties
-                        }
                       >
                         {mythology.name}
                       </Link>
@@ -144,11 +132,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
                         <button
                           onClick={() => toggleExpanded(mythology.id)}
                           className="rounded p-1 hover:bg-gray-700"
-                          aria-label={
-                            expanded === mythology.id
-                              ? 'Zwiń bogów'
-                              : 'Rozwiń bogów'
-                          }
                         >
                           <ChevronDown
                             size={16}
@@ -160,7 +143,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
                       )}
                     </div>
 
-                    {/* Rozwijalne menu bogów */}
                     {expanded === mythology.id && mythology.gods.length > 0 && (
                       <ul className="ml-4 mt-1 space-y-1 border-l border-gray-700">
                         {mythology.gods.map((god) => (
@@ -170,12 +152,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
                                 mythology.name
                               )}/gods/${encodeURIComponent(god.name)}`}
                               className="block rounded px-2 py-1 text-sm hover:text-amber-500"
-                              style={
-                                {
-                                  '--hover-color':
-                                    god.accent_color || mythology.theme_color,
-                                } as React.CSSProperties
-                              }
                             >
                               {god.name}
                               {god.title && (
@@ -195,7 +171,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
             )}
           </div>
 
-          {/* HISTORIA CZATÓW */}
+          {/* HISTORIA */}
           <div className="space-y-2 border-t border-gray-700 pt-4">
             <div className="flex items-center gap-2">
               <History size={16} />
@@ -205,9 +181,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
             </div>
 
             {chatSessions.length === 0 ? (
-              <p className="text-xs text-gray-400">
-                {user ? 'Brak historii' : 'Wyślij pierwszą wiadomość'}
-              </p>
+              <p className="text-xs text-gray-400">Brak historii</p>
             ) : (
               <ul className="space-y-1">
                 {chatSessions.slice(0, 10).map((session) => (
@@ -226,7 +200,6 @@ export function Sidebar({ mythologies }: SidebarProps) {
                     <button
                       onClick={(e) => handleDeleteSession(session.id, e)}
                       className="opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                      aria-label="Usuń sesję"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -244,7 +217,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
           onClick={toggleMenu}
           className="fixed inset-0 z-30 bg-black/50"
           aria-hidden="true"
-        ></div>
+        />
       )}
     </>
   )
