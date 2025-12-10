@@ -257,29 +257,29 @@ export default function ChatContainer({
     )
   }
 
-  const greetingMessage = session.godName
-    ? `Witaj, śmiertelniku. Jestem ${session.godName}. Czego pragniesz ode mnie?`
-    : `Witaj w świecie ${session.mythologyName}. O czym chcesz się dowiedzieć?`
-
   return (
-    <div className="flex h-screen flex-col bg-black">
-      <MessagesArea
-        messages={session.messages}
-        greetingMessage={greetingMessage}
-        isLoading={isLoading}
-      />
+    // ZMIANA: Układ flex na pełną wysokość z paddingiem na górze dla Headeru (pt-20)
+    <div className="flex h-screen w-full flex-col bg-black pt-20">
+      {/* Obszar wiadomości - zajmuje resztę ekranu i wypycha treść do dołu przy małej ilości */}
+      <div className="flex-1 w-full overflow-y-auto no-scrollbar">
+        <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-end">
+          <MessagesArea messages={session.messages} isLoading={isLoading} />
+        </div>
+      </div>
 
-      {/* Input Area - na dole */}
-      <ChatInput
-        mythologies={mythologies}
-        currentMythologyId={session.mythologyId}
-        currentGodId={session.godId}
-        onSend={sendMessage}
-        onSelectionChange={handleSelectionChange}
-        isLoading={isLoading}
-        error={error}
-        isLoggedIn={!!user}
-      />
+      {/* Input Area - Zadokowany na dole */}
+      <div className="w-full bg-black z-10">
+        <ChatInput
+          mythologies={mythologies}
+          currentMythologyId={session.mythologyId}
+          currentGodId={session.godId}
+          onSend={sendMessage}
+          onSelectionChange={handleSelectionChange}
+          isLoading={isLoading}
+          error={error}
+          isLoggedIn={!!user}
+        />
+      </div>
     </div>
   )
 }

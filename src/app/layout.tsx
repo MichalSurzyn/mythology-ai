@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from 'next/font/google'
 import { getMythologiesWithGods } from '@lib/supabase/queries/mythologies'
 import { Sidebar } from '@/components/Sidebar'
+import Header from '@/components/layout/Header'
 import UserButton from '@/components/auth/UserButton'
 import './globals.css'
 import React from 'react'
@@ -28,6 +29,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen bg-gray-50 dark:bg-gray-900`}
       >
+        <Header />
         <Sidebar mythologies={mythologies} />
 
         {/* UserButton - prawy górny róg */}

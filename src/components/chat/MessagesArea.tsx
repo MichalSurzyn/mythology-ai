@@ -8,13 +8,11 @@ import React from 'react'
 
 interface MessagesAreaProps {
   messages: any[]
-  greetingMessage: string
   isLoading: boolean
 }
 
 export default function MessagesArea({
   messages,
-  greetingMessage,
   isLoading,
 }: MessagesAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -26,15 +24,6 @@ export default function MessagesArea({
   return (
     <div className="flex-1 overflow-y-auto px-6 py-8">
       <div className="mx-auto max-w-3xl space-y-6">
-        {/* Powitanie (jeśli brak wiadomości) */}
-        {messages.length === 0 && (
-          <div className="flex justify-center">
-            <div className="max-w-[80%] rounded-xl border border-amber-500/30 bg-amber-500/10 px-6 py-4 text-center">
-              <p className="text-amber-200">{greetingMessage}</p>
-            </div>
-          </div>
-        )}
-
         {/* Wiadomości */}
         <AnimatePresence>
           {messages.map((message) => (

@@ -32,6 +32,25 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@layer utilities {
+  /* Ukrywanie scrollbara dla Chrome, Safari i Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Ukrywanie scrollbara dla IE, Edge i Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+/* Aplikuj globalnie do html i body */
+html,
+body {
+  @apply no-scrollbar bg-black text-white;
+  overflow-x: hidden;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
