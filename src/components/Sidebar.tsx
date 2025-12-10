@@ -25,26 +25,34 @@ export function Sidebar({ mythologies }: SidebarProps) {
   const [chatSessions, setChatSessions] = useState<any[]>([])
   const { user } = useAuth()
 
-  // Załaduj sesje (localStorage lub baza)
+  // Załaduj sesje
   useEffect(() => {
-    async function loadSessions() {
-      if (user) {
-        // Zalogowany - pobierz z bazy
-        try {
-          const sessions = await getUserSessions(user.id)
-          setChatSessions(sessions)
-        } catch (error) {
-          console.error('Error loading sessions:', error)
-        }
-      } else {
-        // Gość - pobierz z localStorage
-        const sessions = getAllSessions()
-        setChatSessions(sessions)
-      }
-    }
-
     loadSessions()
   }, [user])
+
+  const loadSessions = async () => {
+    if (user) {
+      // Zalogowany - pobierz z bazy
+      try {
+        const sessions = await getUserSessions(user.id)
+        // Filtruj sesje z pustymi messages (to były tylko inicjalizacje)
+        const validSessions = sessions.filter(
+          (s) => s.messages && s.messages.length > 0
+        )
+        setChatSessions(validSessions)
+      } catch (error) {
+        console.error('Error loading sessions:', error)
+      }
+    } else {
+      // Gość - pobierz z localStorage
+      const sessions = getAllSessions()
+      // Filtruj sesje z pustymi messages
+      const validSessions = sessions.filter(
+        (s) => s.messages && s.messages.length > 0
+      )
+      setChatSessions(validSessions)
+    }
+  }
 
   const toggleExpanded = (mythologyId: string) => {
     setExpanded(expanded === mythologyId ? null : mythologyId)
@@ -54,13 +62,31 @@ export function Sidebar({ mythologies }: SidebarProps) {
     setIsOpen(!isOpen)
   }
 
-  const handleDeleteSession = async (sessionId: string) => {
-    if (user) {
-      await deleteDbSession(sessionId)
-      setChatSessions((prev) => prev.filter((s) => s.id !== sessionId))
-    } else {
-      deleteLocalSession(sessionId)
-      setChatSessions((prev) => prev.filter((s) => s.id !== sessionId))
+  const handleLoadSession = (session: any) => {
+    // Wywołaj funkcję z ChatInterface (przez window)
+    if (typeof window !== 'undefined' && (window as any).loadChatSession) {
+      ;(window as any).loadChatSession(session)
+      setIsOpen(false) // Zamknij sidebar po załadowaniu
+    }
+  }
+
+  const handleDeleteSession = async (
+    sessionId: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation() // Nie wywołuj loadSession przy usuwaniu
+
+    try {
+      if (user) {
+        await deleteDbSession(sessionId)
+      } else {
+        deleteLocalSession(sessionId)
+      }
+
+      // Odśwież listę
+      loadSessions()
+    } catch (error) {
+      console.error('Error deleting session:', error)
     }
   }
 
@@ -179,7 +205,9 @@ export function Sidebar({ mythologies }: SidebarProps) {
             </div>
 
             {chatSessions.length === 0 ? (
-              <p className="text-xs text-gray-400">Brak historii</p>
+              <p className="text-xs text-gray-400">
+                {user ? 'Brak historii' : 'Wyślij pierwszą wiadomość'}
+              </p>
             ) : (
               <ul className="space-y-1">
                 {chatSessions.slice(0, 10).map((session) => (
@@ -188,10 +216,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
                     className="group flex items-center justify-between rounded px-2 py-2 text-sm hover:bg-gray-800"
                   >
                     <button
-                      onClick={() => {
-                        // TODO: Załaduj sesję do czatu
-                        console.log('Load session:', session.id)
-                      }}
+                      onClick={() => handleLoadSession(session)}
                       className="flex-1 truncate text-left text-gray-300 hover:text-amber-500"
                     >
                       {session.session_name ||
@@ -199,7 +224,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
                         session.mythologyName}
                     </button>
                     <button
-                      onClick={() => handleDeleteSession(session.id)}
+                      onClick={(e) => handleDeleteSession(session.id, e)}
                       className="opacity-0 transition hover:text-red-400 group-hover:opacity-100"
                       aria-label="Usuń sesję"
                     >

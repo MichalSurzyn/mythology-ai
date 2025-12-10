@@ -1,0 +1,73 @@
+Wydaje się że działa nie najgorzej
+Do poprawy:
+Wylogowanie się nie odświeża strony, więc jak ktoś coś wpisał w czacie to on zostaje aktywny, reszta się zmienia ale przydało by się odświeżenie.
+Zalogowanie się też nie odświeża strony, jednak przydało by się to dodać
+Gdy wpiszę coś w czacie i  dostane respond to jak kliknę na sidebar nic się nie pojawia w historii dopiero po odświeżeniu strony
+
+Gdy ktoś jest zalogowany i odświeza stronę/ pokazuje czat to do bazy danych "chat_session" wklejane są niepotrzebne rekordy z id usera, id mitologii i pustym messages jsonb
+
+ALE ALE, TAMTO MOZE POCZEKAĆ TU NIŻEJ 
+--wklejione:
+CHCE WPROWADZIĆ WAŻNE ZMIANY:
+Co chciałbym zeby również było poprawione WAŻNE!!:
+Teraz sekcja czatu jest sobie divem/okienkiem nad jest wybór mitologii
+Chcę by to wyglądało tak że wybór mitologii/boga był pod inputem do wpisywania wiadomości a wiadomości pisane przez użytkownika i odpowiedzi od czatu były na cały zakres strony (nie koniecznie szerokosć, wiadomości mogą być mniej wiecej na środku, ale wysokość) --> czyli po prostu czat na całą stronę jak w gpt, cloude czy gemini
+
+Teraz nazwa MythChat -> motion.h1 razem z innymi elementami LandingLayout po scrollu znikają u góry, chciałbym by to h1 MythChat po przescrolowaniu do czatu zostawało u góry strony (Taki niby nav, po prostu zostanie tam u góry, chyba że przescrolujesz spowrotem do góry wtedy spowrotem przescroluje się do początkowej pozycji)
+
+Gdy uzytkownik rozpocznie rozmowę to nie będzie już można przescrolować do tego LandingLayout, ponieważ czat zajmię całą wysokość strony
+
++---------------------------------------------------------------+
+| Menu          MythChat (H1 - przyklejone na górze)      User  | <--- Sticky Header albo coś dla Tego MythChat
++---------------------------------------------------------------+
+|                                                               |
+|                                                               |
+|           Przywitanie: Witaj w świecie Greków...              |
+|                                                               |
+|                                                               |
+|                                                               |
+|                              [Ty]: Opowiedz mi o...           |
+|                                                               |
+|           [Asystent]: ...  to król bogów...                   |
+|                                                               |
+|                                                               |
+|         (Obszar wiadomości zajmuje całą dostępną wysokość)    |
+|                                                               |
++---------------------------------------------------------------+
+| +-----------------------------------------------------------+ |
+| |  [ Tu wpisz swoją wiadomość...              ]  |  (Send >)  | <--- Input
+| +-----------------------------------------------------------+ |
+|                                                               |
+|  [ Wybierz Mitologię v ]   [ Wybierz Boga v ]                 | <--- Selektory pod inputem
++---------------------------------------------------------------+
+
+Powinniśmy rozdzielić to na dwa byty logiczne (a nawet osobne adresy URL):
+
+Landing Page (/): Ma tylko "zachętę" (Input startowy). Jest zawsze czysty. Nie ładuje tutaj historii. Służy tylko do złapania pierwszego zapytania (tzw. intent).
+
+Chat Page (/chat/[id] lub /c/[id]): To jest ten "prawdziwy" moduł czatu na pełny ekran. Tutaj lądujesz, gdy klikniesz w historię w sidebarze LUB gdy wyślesz pierwszą wiadomość z Landing Page.
+
+Wizja "Płynnego Przejścia" (The Illusion)
+Użytkownik wchodzi na stronę główną. Widzi Hero Section, Zeusa i ładny Input na środku.
+
+Użytkownik wpisuje: "Opowiedz mi o ...".
+
+Klika ENTER.
+
+Aplikacja robi "magię":
+
+Nie wysyła zapytania do API na tej stronie.
+
+Zamiast tego, przekierowuje użytkownika na nową ścieżkę, np. /chat/new?q=Opowiedz+mi+o+Zeusie.
+
+Dopiero tam, na nowym widoku (który wygląda jak pełny czat), wiadomość jest automatycznie wklejana i wysyłana.
+
+Zalety tego podejścia:
+
+Landing jest zawsze lekki. Nie pobiera historii, nie sprawdza sesji w localStorage przy wejściu.
+
+Historie działają naturalnie. Kliknięcie w sidebarze w "Rozmowa o Hadesie" przenosi Cię na /chat/123, a nie na Landing Page, który musi się "przeistoczyć" w czat.
+
+Wygląd: Czat na /chat jest naturalnie na pełną wysokość
+Input na stronie głównej ma wyglądać identycznie jak ten docelowy w czacie (żeby zachować spójność wizualną)
+NA LANDING: selektory (Wybierz Mitologię / Boga) też powinny tam być, jak ktoś tam wybierze to landing przekieruje do czatu i on zrobi reszte

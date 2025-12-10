@@ -5,8 +5,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, Send, AlertCircle } from 'lucide-react'
 import MythologySelector from './MythologySelector'
 import MessageBubble from './MessageBubble'
-import { saveSession, getSession } from '@lib/utils/localStorage'
+import {
+  saveSession,
+  getSession,
+  getAllSessions,
+} from '@lib/utils/localStorage'
 import { checkRateLimit } from '@lib/utils/rateLimit'
+import { useAuth } from '@lib/hooks/useAuth'
+import {
+  getUserSessions,
+  createSession,
+  updateSession,
+  migrateSessions,
+} from '@lib/supabase/queries/chat'
 import React from 'react'
 
 type Message = {
@@ -31,27 +42,52 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
+  const { user } = useAuth()
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasMigrated, setHasMigrated] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Wybór losowej mitologii na start
+  // Migracja sesji z localStorage po zalogowaniu
+  useEffect(() => {
+    async function migrateLocalSessions() {
+      if (user && !hasMigrated) {
+        try {
+          const localSessions = getAllSessions()
+          if (localSessions.length > 0) {
+            await migrateSessions(user.id, localSessions)
+            // Wyczyść localStorage po migracji
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('mythchat_sessions')
+            }
+            setHasMigrated(true)
+          }
+        } catch (error) {
+          console.error('Migration error:', error)
+        }
+      }
+    }
+
+    migrateLocalSessions()
+  }, [user, hasMigrated])
+
+  // Wybór losowej mitologii na start (tylko jeśli brak currentSession)
   useEffect(() => {
     if (mythologies.length > 0 && !currentSession) {
       const randomMythology =
         mythologies[Math.floor(Math.random() * mythologies.length)]
       initializeSession(randomMythology.id, randomMythology.name, null, null)
     }
-  }, [mythologies])
+  }, [mythologies, currentSession])
 
   // Auto-scroll
-  //   useEffect(() => {
-  //     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  //   }, [currentSession?.messages])
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  // }, [currentSession?.messages])
 
-  const initializeSession = (
+  const initializeSession = async (
     mythologyId: string,
     mythologyName: string,
     godId: string | null,
@@ -60,36 +96,55 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
     const sessionId = `${mythologyId}_${godId || 'mythology'}`
 
     // Sprawdź czy sesja już istnieje
-    const existingSession = getSession(sessionId)
-    if (existingSession) {
-      setCurrentSession(existingSession)
-      return
+    if (user) {
+      // Zalogowany - sprawdź w bazie
+      try {
+        const dbSessions = await getUserSessions(user.id)
+        const existing = dbSessions.find(
+          (s) => s.mythology_id === mythologyId && s.god_id === godId
+        )
+
+        if (existing) {
+          setCurrentSession({
+            id: existing.id,
+            mythologyId: existing.mythology_id,
+            mythologyName,
+            godId: existing.god_id,
+            godName,
+            messages: existing.messages || [],
+            createdAt: existing.created_at,
+          })
+          return
+        }
+      } catch (error) {
+        console.error('Error checking db sessions:', error)
+      }
+    } else {
+      // Gość - sprawdź localStorage
+      const existingSession = getSession(sessionId)
+      if (existingSession) {
+        setCurrentSession(existingSession)
+        return
+      }
     }
 
-    // Nowa sesja
-    const greeting = godName
-      ? `Witaj, śmiertelniku. Jestem ${godName}. Czego pragniesz ode mnie?`
-      : `Witaj w świecie ${mythologyName}. Jestem narratorem tej mitologii. O czym chcesz się dowiedzieć?`
-
+    // Nowa sesja (PUSTA - bez powitania w messages)
     const newSession: ChatSession = {
       id: sessionId,
       mythologyId,
       mythologyName,
       godId,
       godName,
-      messages: [
-        {
-          id: '0',
-          role: 'assistant',
-          content: greeting,
-          timestamp: new Date().toISOString(),
-        },
-      ],
+      messages: [], // ← PUSTA!
       createdAt: new Date().toISOString(),
     }
 
     setCurrentSession(newSession)
-    saveSession(newSession)
+
+    // Zapisz tylko jeśli to gość (zalogowani zapiszą przy pierwszej wiadomości)
+    if (!user) {
+      saveSession(newSession)
+    }
   }
 
   const handleSelectionChange = (
@@ -101,13 +156,33 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
     initializeSession(mythologyId, mythologyName, godId, godName)
   }
 
+  // Załaduj sesję z sidebara (nowa funkcja!)
+  const loadSession = (session: any) => {
+    setCurrentSession({
+      id: session.id,
+      mythologyId: session.mythology_id || session.mythologyId,
+      mythologyName: session.mythologyName || 'Mitologia',
+      godId: session.god_id || session.godId,
+      godName: session.godName || null,
+      messages: session.messages || [],
+      createdAt: session.created_at || session.createdAt,
+    })
+  }
+
+  // Expose loadSession via window (dla Sidebar)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ;(window as any).loadChatSession = loadSession
+    }
+  }, [])
+
   const handleSend = async () => {
     if (!input.trim() || isLoading || !currentSession) return
 
-    // Rate limit check
-    const canSend = checkRateLimit(false) // false = guest
+    // Rate limit
+    const canSend = checkRateLimit(!!user)
     if (!canSend) {
-      setError('Osiągnąłeś limit wiadomości (1/min). Poczekaj chwilę.')
+      setError(`Osiągnąłeś limit (${user ? '2' : '1'}/min). Poczekaj chwilę.`)
       setTimeout(() => setError(null), 5000)
       return
     }
@@ -122,13 +197,31 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
     const updatedMessages = [...currentSession.messages, userMessage]
     const updatedSession = { ...currentSession, messages: updatedMessages }
     setCurrentSession(updatedSession)
-    saveSession(updatedSession)
 
     setInput('')
     setIsLoading(true)
     setError(null)
 
     try {
+      // Jeśli to pierwsza wiadomość zalogowanego usera, utwórz sesję w bazie
+      if (user && currentSession.messages.length === 0) {
+        const dbSession = await createSession(
+          user.id,
+          currentSession.mythologyId,
+          currentSession.godId,
+          currentSession.godName || currentSession.mythologyName,
+          updatedMessages
+        )
+        updatedSession.id = dbSession.id // Zaktualizuj ID na bazodanowe
+      } else if (user) {
+        // Aktualizuj istniejącą sesję w bazie
+        await updateSession(currentSession.id, updatedMessages)
+      } else {
+        // Gość - zapisz do localStorage
+        saveSession(updatedSession)
+      }
+
+      // Wywołaj API
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,9 +237,7 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
         }),
       })
 
-      if (!response.ok) {
-        throw new Error('API error')
-      }
+      if (!response.ok) throw new Error('API error')
 
       const data = await response.json()
 
@@ -158,9 +249,15 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
       }
 
       const finalMessages = [...updatedMessages, assistantMessage]
-      const finalSession = { ...currentSession, messages: finalMessages }
+      const finalSession = { ...updatedSession, messages: finalMessages }
       setCurrentSession(finalSession)
-      saveSession(finalSession)
+
+      // Zapisz finalną sesję
+      if (user) {
+        await updateSession(finalSession.id, finalMessages)
+      } else {
+        saveSession(finalSession)
+      }
     } catch (err) {
       console.error('Chat error:', err)
       setError('Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.')
@@ -184,6 +281,13 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
     )
   }
 
+  // Wiadomość powitalna (POZA messages!)
+  const greetingMessage = currentSession.godName
+    ? `Witaj, śmiertelniku. Jestem ${currentSession.godName}. Czego pragniesz ode mnie?`
+    : `Witaj w świecie ${currentSession.mythologyName}. Jestem narratorem tej mitologii. O czym chcesz się dowiedzieć?`
+
+  const hasMessages = currentSession.messages.length > 0
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
@@ -202,6 +306,16 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
       {/* Messages */}
       <div className="flex min-h-[400px] flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/30 p-6 backdrop-blur-sm">
         <div className="flex-1 space-y-4 overflow-y-auto max-h-[500px]">
+          {/* Powitanie (tylko jeśli brak wiadomości) */}
+          {!hasMessages && (
+            <div className="flex justify-center">
+              <div className="max-w-[80%] rounded-xl border border-amber-500/30 bg-amber-500/10 px-6 py-4 text-center">
+                <p className="text-amber-200">{greetingMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Wiadomości */}
           <AnimatePresence>
             {currentSession.messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
@@ -256,7 +370,7 @@ export default function ChatInterface({ mythologies }: ChatInterfaceProps) {
         </div>
 
         <p className="mt-2 text-center text-xs text-zinc-500">
-          Limit: 1 wiadomość/minutę (goście)
+          Limit: {user ? '2 wiadomości/min' : '1 wiadomość/min'}
         </p>
       </div>
     </div>
