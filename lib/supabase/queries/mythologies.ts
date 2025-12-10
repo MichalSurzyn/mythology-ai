@@ -1,9 +1,5 @@
-import { supabase } from '../client'
-import type { Mythology, MythologyWithGods } from './types'
-
-// =====================================================
-// QUERIES - Mitologie
-// =====================================================
+import { supabase } from '@lib/supabase/client'
+import { Mythology, MythologyWithGods } from './types'
 
 /**
  * Pobierz wszystkie mitologie z ich bogami (dla Sidebar)
@@ -66,6 +62,24 @@ export async function getMythologyByName(
 
   if (error) {
     console.error('Error fetching mythology:', error)
+    throw error
+  }
+
+  return data
+}
+
+/**
+ * Pobierz mitologię po ID
+ */
+export async function getMythologyById(id: string): Promise<Mythology | null> {
+  const { data, error } = await supabase
+    .from('mythologies')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error fetching mythology by ID:', error)
     throw error
   }
 
