@@ -27,6 +27,14 @@ export default function MythologySelector({
   const [gods, setGods] = useState<any[]>([])
   const [selectedGod, setSelectedGod] = useState<string | null>(currentGodId)
 
+  // Synchronizuj gdy zmieni się currentMythologyId z rodzica
+  useEffect(() => {
+    if (currentMythologyId && currentMythologyId !== selectedMythology) {
+      setSelectedMythology(currentMythologyId)
+      setSelectedGod(null)
+    }
+  }, [currentMythologyId])
+
   // Pobierz bogów dla wybranej mitologii
   useEffect(() => {
     async function loadGods() {

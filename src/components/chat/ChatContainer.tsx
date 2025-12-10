@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import ChatHeader from './ChatHeader'
 import MessagesArea from './MessagesArea'
 import ChatInput from './ChatInput'
 import { useAuth } from '@lib/hooks/useAuth'
@@ -264,10 +263,6 @@ export default function ChatContainer({
 
   return (
     <div className="flex h-screen flex-col bg-black">
-      {/* Sticky Header
-      <ChatHeader title={session.godName || session.mythologyName} /> */}
-
-      {/* Messages Area - zajmuje całą dostępną przestrzeń */}
       <MessagesArea
         messages={session.messages}
         greetingMessage={greetingMessage}
