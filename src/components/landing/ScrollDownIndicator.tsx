@@ -11,7 +11,7 @@ export default function ScrollDownIndicator() {
       animate={{ y: [0, 10, 0] }}
       transition={{ duration: 2, repeat: Infinity }}
     >
-      <ChevronDown size={32} className="text-amber-500" />
+      <ChevronDown size={32} className="text-accent" />
     </motion.div>
   )
 }
