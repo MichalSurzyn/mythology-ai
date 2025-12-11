@@ -42,7 +42,7 @@ export default function Header() {
         >
           <Link href="/">
             {/* Używamy tej samej czcionki co w Hero, ale mniejszej */}
-            <h1 className="font-runewood text-2xl tracking-tight text-white hover:text-amber-500 transition-colors cursor-pointer">
+            <h1 className="font-runewood text-2xl tracking-tight text-white hover:text-accent transition-colors cursor-pointer">
               MythChat
             </h1>
           </Link>

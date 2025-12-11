@@ -1,37 +1,69 @@
+/* src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+  --accent-color: #ffffff; /* Default - nadpisywane przez ThemeContext */
+  --accent-rgb: 255, 255, 255;
 }
 
+/* Font faces */
 @font-face {
   font-family: 'Runewood';
   src: url('/fonts/runewood.regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Ole';
   src: url('/fonts/Ole-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'Italianno';
   src: url('/fonts/Italianno-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+/* ========================================
+   BACKGROUND TRANSPARENT - Dla animacji tła
+   ======================================== */
+@layer base {
+  /* Wszystkie elementy transparent domyślnie */
+  *,
+  *::before,
+  *::after {
+    background-color: transparent;
+  }
+
+  /* Wyjątki - elementy które MUSZĄ mieć tło */
+  body {
+    @apply bg-black text-white;
+  }
+
+  /* Formularz elementy - muszą mieć tło dla widoczności */
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    @apply bg-zinc-900 text-white;
+  }
+
+  /* Przyciski - jeśli chcemy solidne tło */
+  button {
+    /* Domyślnie transparent, stylujemy per komponent */
+  }
 }
 
+/* ========================================
+   UTILITIES
+   ======================================== */
 @layer utilities {
   /* Ukrywanie scrollbara dla Chrome, Safari i Opera */
   .no-scrollbar::-webkit-scrollbar {
@@ -42,24 +74,55 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
-}
 
-/* Aplikuj globalnie do html i body */
-html,
-body {
-  @apply no-scrollbar bg-black text-white;
-  overflow-x: hidden;
-}
+  /* Akcent utilities */
+  .text-accent {
+    color: var(--accent-color);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  .border-accent {
+    border-color: var(--accent-color);
+  }
+
+  .bg-accent {
+    background-color: var(--accent-color);
+  }
+
+  .bg-accent-10 {
+    background-color: rgba(var(--accent-rgb), 0.1);
+  }
+
+  .bg-accent-20 {
+    background-color: rgba(var(--accent-rgb), 0.2);
+  }
+
+  /* Glassmorphism surfaces */
+  .bg-surface {
+    @apply bg-zinc-900/80 backdrop-blur-md;
+  }
+
+  .bg-card {
+    @apply bg-zinc-800/70 backdrop-blur-sm;
   }
 }
 
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  @apply no-scrollbar;
+  overflow-x: hidden;
+}
+
+body {
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Theme inline (Next.js specific) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }

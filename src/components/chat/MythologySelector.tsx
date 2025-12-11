@@ -82,7 +82,7 @@ export default function MythologySelector({
         <select
           value={selectedMythology}
           onChange={(e) => handleMythologyChange(e.target.value)}
-          className="appearance-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 pr-10 text-sm text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          className="appearance-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 pr-10 text-sm text-white focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         >
           {mythologies.map((mythology) => (
             <option key={mythology.id} value={mythology.id}>
@@ -102,7 +102,7 @@ export default function MythologySelector({
           <select
             value={selectedGod || 'mythology'}
             onChange={(e) => handleGodChange(e.target.value)}
-            className="appearance-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 pr-10 text-sm text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="appearance-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 pr-10 text-sm text-white focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="mythology">Mitologia (ogólnie)</option>
             {gods.map((god) => (

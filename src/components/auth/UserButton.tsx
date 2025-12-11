@@ -15,7 +15,7 @@ export default function UserButton() {
   if (loading) {
     return (
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     )
   }
@@ -26,7 +26,7 @@ export default function UserButton() {
       <>
         <button
           onClick={() => setShowAuthModal(true)}
-          className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-500"
+          className="flex items-center gap-2 rounded-lg bg-accent hover:opacity-90 px-4 py-2 text-sm font-medium text-white transition"
         >
           <LogIn size={18} />
           <span className="hidden sm:inline">Zaloguj się</span>
@@ -47,9 +47,9 @@ export default function UserButton() {
     <div className="relative">
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition hover:border-amber-500"
+        className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition hover:border-accent"
       >
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-600 text-xs font-bold">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold">
           {displayName[0].toUpperCase()}
         </div>
         <span className="hidden sm:inline">{displayName}</span>

@@ -105,7 +105,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="twoj@email.com"
                 />
               </div>
@@ -120,7 +120,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="••••••••"
                 />
               </div>
@@ -128,7 +128,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-3 font-medium text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent hover:opacity-90 px-4 py-3 font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 size={18} className="animate-spin" />}
                 {mode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
@@ -142,7 +142,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   setMode(mode === 'login' ? 'register' : 'login')
                   setError(null)
                 }}
-                className="text-sm text-zinc-400 hover:text-amber-500"
+                className="text-sm text-zinc-400 hover:text-accent"
               >
                 {mode === 'login'
                   ? 'Nie masz konta? Zarejestruj się'

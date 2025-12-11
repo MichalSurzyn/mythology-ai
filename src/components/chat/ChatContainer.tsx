@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import MessagesArea from './MessagesArea'
 import ChatInput from './ChatInput'
 import { useAuth } from '@lib/hooks/useAuth'
+import { useTheme } from '@lib/contexts/ThemeContext'
 import { getSession, saveSession } from '@lib/utils/localStorage'
 import {
   getUserSessions,
@@ -50,6 +51,7 @@ export default function ChatContainer({
 }: ChatContainerProps) {
   const router = useRouter()
   const { user } = useAuth()
+  const { setAccent } = useTheme() // 👈 Nowy hook!
   const [session, setSession] = useState<ChatSession | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +60,6 @@ export default function ChatContainer({
   // Załaduj lub stwórz sesję
   useEffect(() => {
     async function loadSession() {
-      // spróbuj wyciągnąć ID z paramu, albo z samego sessionId (<mythId>_<godId|mythology>)
       const [parsedMythId, parsedGodIdRaw] = sessionId.split('_')
       const parsedGodId =
         parsedGodIdRaw && parsedGodIdRaw !== 'mythology' ? parsedGodIdRaw : null
@@ -67,7 +68,6 @@ export default function ChatContainer({
       let godIdToUse = godId ?? parsedGodId
 
       try {
-        // Sprawdź czy sesja istnieje
         let existingSession: ChatSession | null = null
 
         if (user) {
@@ -100,9 +100,10 @@ export default function ChatContainer({
           }
         }
 
-        // Jeśli sesja istnieje, załaduj ją
         if (existingSession) {
           setSession(existingSession)
+          // Ustaw kolor akcentu
+          await setAccent(existingSession.mythologyId, existingSession.godId)
           return
         }
 
@@ -112,7 +113,6 @@ export default function ChatContainer({
           return
         }
 
-        // Nowa sesja
         const mythology = await getMythologyById(mythologyIdToUse)
         const god = godIdToUse ? await getGodById(godIdToUse) : null
 
@@ -128,7 +128,9 @@ export default function ChatContainer({
 
         setSession(newSession)
 
-        // Zapisz tylko dla gości (zalogowani przy pierwszej wiadomości)
+        // Ustaw kolor akcentu
+        await setAccent(newSession.mythologyId, newSession.godId)
+
         if (!user) {
           saveSession(newSession)
         }
@@ -138,7 +140,7 @@ export default function ChatContainer({
     }
 
     loadSession()
-  }, [sessionId, mythologyId, godId, user])
+  }, [sessionId, mythologyId, godId, user, setAccent])
 
   // Wyślij inicjalne zapytanie
   useEffect(() => {
@@ -151,7 +153,6 @@ export default function ChatContainer({
   const sendMessage = async (content: string) => {
     if (!content.trim() || !session || isLoading) return
 
-    // Rate limit
     const canSend = checkRateLimit(!!user)
     if (!canSend) {
       setError(`Limit (${user ? '2' : '1'}/min). Poczekaj.`)
@@ -173,7 +174,6 @@ export default function ChatContainer({
     setError(null)
 
     try {
-      // Stwórz sesję w bazie przy pierwszej wiadomości
       if (user && session.messages.length === 0) {
         const dbSession = await createSession(
           user.id,
@@ -189,7 +189,6 @@ export default function ChatContainer({
         saveSession(updatedSession)
       }
 
-      // API call
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -220,7 +219,6 @@ export default function ChatContainer({
       const finalSession = { ...updatedSession, messages: finalMessages }
       setSession(finalSession)
 
-      // Zapisz
       if (user) {
         await updateSession(finalSession.id, finalMessages)
       } else {
@@ -234,12 +232,15 @@ export default function ChatContainer({
     }
   }
 
-  const handleSelectionChange = (
+  const handleSelectionChange = async (
     mythologyId: string,
     mythologyName: string,
     godId: string | null,
     godName: string | null
   ) => {
+    // Zmień kolor akcentu natychmiast
+    await setAccent(mythologyId, godId)
+
     // Przekieruj do nowej sesji
     const newSessionId = `${mythologyId}_${godId || 'mythology'}`
     router.push(
@@ -251,24 +252,21 @@ export default function ChatContainer({
 
   if (!session) {
     return (
-      <div className="flex h-screen items-center justify-center bg-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     )
   }
 
   return (
-    // ZMIANA: Układ flex na pełną wysokość z paddingiem na górze dla Headeru (pt-20)
-    <div className="flex h-screen w-full flex-col bg-black pt-20">
-      {/* Obszar wiadomości - zajmuje resztę ekranu i wypycha treść do dołu przy małej ilości */}
+    <div className="flex h-screen w-full flex-col pt-20">
       <div className="flex-1 w-full overflow-y-auto no-scrollbar">
         <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-end">
           <MessagesArea messages={session.messages} isLoading={isLoading} />
         </div>
       </div>
 
-      {/* Input Area - Zadokowany na dole */}
-      <div className="w-full bg-black z-10">
+      <div className="w-full z-10">
         <ChatInput
           mythologies={mythologies}
           currentMythologyId={session.mythologyId}

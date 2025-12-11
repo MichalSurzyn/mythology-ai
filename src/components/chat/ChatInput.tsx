@@ -91,7 +91,7 @@ export default function ChatInput({
         <button
           onClick={handleSend}
           disabled={!input.trim() || disabled}
-          className="self-end rounded-full bg-amber-600 p-4 text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50 mb-1"
+          className="self-end rounded-full bg-accent hover:opacity-90 p-4 text-white transition  disabled:cursor-not-allowed disabled:opacity-50 mb-1"
         >
           <Send size={24} />
         </button>

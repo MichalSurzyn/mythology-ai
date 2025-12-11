@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { MythologyWithGods } from '@lib/supabase/queries/types'
 import { ChevronDown, Menu, X, History, Trash2 } from 'lucide-react'
 import { useAuth } from '@lib/hooks/useAuth'
+import { useTheme } from '@lib/contexts/ThemeContext'
 import {
   getAllSessions,
   deleteSession as deleteLocalSession,
@@ -22,6 +23,7 @@ interface SidebarProps {
 
 export function Sidebar({ mythologies }: SidebarProps) {
   const router = useRouter()
+  const { setAccent } = useTheme() // 👈 Hook do zmiany koloru
   const [expanded, setExpanded] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [chatSessions, setChatSessions] = useState<any[]>([])
@@ -59,8 +61,12 @@ export function Sidebar({ mythologies }: SidebarProps) {
     setIsOpen(!isOpen)
   }
 
-  const handleLoadSession = (session: any) => {
-    // Przekieruj do /chat/[sessionId]
+  const handleLoadSession = async (session: any) => {
+    // Ustaw kolor przed przekierowaniem
+    await setAccent(
+      session.mythologyId || session.mythology_id,
+      session.godId || session.god_id
+    )
     router.push(`/chat/${session.id}`)
     setIsOpen(false)
   }
@@ -102,7 +108,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
       >
         <nav className="flex h-full flex-col overflow-y-auto p-4 pt-16">
           <Link href="/" className="mb-4 block">
-            <h2 className="text-lg font-semibold hover:text-amber-500">
+            <h2 className="text-lg font-semibold hover:text-accent transition-colors">
               MythChat
             </h2>
           </Link>
@@ -124,14 +130,14 @@ export function Sidebar({ mythologies }: SidebarProps) {
                         href={`/mythologies/${encodeURIComponent(
                           mythology.name
                         )}`}
-                        className="flex-1 rounded px-2 py-2 text-sm font-medium hover:text-amber-500"
+                        className="flex-1 rounded px-2 py-2 text-sm font-medium hover:text-accent transition-colors"
                       >
                         {mythology.name}
                       </Link>
                       {mythology.gods.length > 0 && (
                         <button
                           onClick={() => toggleExpanded(mythology.id)}
-                          className="rounded p-1 hover:bg-gray-700"
+                          className="rounded p-1 hover:bg-zinc-700"
                         >
                           <ChevronDown
                             size={16}
@@ -151,7 +157,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
                               href={`/mythologies/${encodeURIComponent(
                                 mythology.name
                               )}/gods/${encodeURIComponent(god.name)}`}
-                              className="block rounded px-2 py-1 text-sm hover:text-amber-500"
+                              className="block rounded px-2 py-1 text-sm hover:text-accent transition-colors"
                             >
                               {god.name}
                               {god.title && (
@@ -187,11 +193,11 @@ export function Sidebar({ mythologies }: SidebarProps) {
                 {chatSessions.slice(0, 10).map((session) => (
                   <li
                     key={session.id}
-                    className="group flex items-center justify-between rounded px-2 py-2 text-sm hover:bg-gray-800"
+                    className="group flex items-center justify-between rounded px-2 py-2 text-sm hover:bg-zinc-800"
                   >
                     <button
                       onClick={() => handleLoadSession(session)}
-                      className="flex-1 truncate text-left text-gray-300 hover:text-amber-500"
+                      className="flex-1 truncate text-left text-gray-300 hover:text-accent transition-colors"
                     >
                       {session.session_name ||
                         session.godName ||
