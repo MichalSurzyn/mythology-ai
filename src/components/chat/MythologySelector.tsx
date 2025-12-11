@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { getGodsByMythologyId } from '@lib/supabase/queries/gods'
+import { useTheme } from '@lib/contexts/ThemeContext'
 import React from 'react'
 
 interface MythologySelectorProps {
-  mythologies: any[]
   currentMythologyId: string
   currentGodId: string | null
   onSelectionChange: (
@@ -18,13 +17,12 @@ interface MythologySelectorProps {
 }
 
 export default function MythologySelector({
-  mythologies,
   currentMythologyId,
   currentGodId,
   onSelectionChange,
 }: MythologySelectorProps) {
+  const { mythologies } = useTheme() // ✅ Zawsze z Context
   const [selectedMythology, setSelectedMythology] = useState(currentMythologyId)
-  const [gods, setGods] = useState<any[]>([])
   const [selectedGod, setSelectedGod] = useState<string | null>(currentGodId)
 
   // Synchronizuj gdy zmieni się currentMythologyId z rodzica
@@ -33,18 +31,11 @@ export default function MythologySelector({
       setSelectedMythology(currentMythologyId)
       setSelectedGod(null)
     }
-  }, [currentMythologyId])
+  }, [currentMythologyId, selectedMythology])
 
-  // Pobierz bogów dla wybranej mitologii
-  useEffect(() => {
-    async function loadGods() {
-      if (selectedMythology) {
-        const fetchedGods = await getGodsByMythologyId(selectedMythology)
-        setGods(fetchedGods)
-      }
-    }
-    loadGods()
-  }, [selectedMythology])
+  // Znajdź aktualną mitologię i jej bogów
+  const currentMythology = mythologies.find((m) => m.id === selectedMythology)
+  const gods = currentMythology?.gods || []
 
   const handleMythologyChange = (mythologyId: string) => {
     setSelectedMythology(mythologyId)

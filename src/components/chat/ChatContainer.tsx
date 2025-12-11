@@ -36,7 +36,6 @@ type ChatSession = {
 
 interface ChatContainerProps {
   sessionId: string
-  mythologies: any[]
   initialQuery?: string
   mythologyId?: string
   godId?: string
@@ -44,7 +43,6 @@ interface ChatContainerProps {
 
 export default function ChatContainer({
   sessionId,
-  mythologies,
   initialQuery,
   mythologyId,
   godId,
@@ -268,7 +266,6 @@ export default function ChatContainer({
 
       <div className="w-full z-10">
         <ChatInput
-          mythologies={mythologies}
           currentMythologyId={session.mythologyId}
           currentGodId={session.godId}
           onSend={sendMessage}

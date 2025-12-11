@@ -7,7 +7,6 @@ import MythologySelector from '@/components/chat/MythologySelector'
 import React from 'react'
 
 interface ChatInputProps {
-  mythologies: any[]
   currentMythologyId: string
   currentGodId: string | null
   onSend: (message: string) => void | Promise<void>
@@ -24,7 +23,6 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({
-  mythologies,
   currentMythologyId,
   currentGodId,
   onSend,
@@ -100,7 +98,7 @@ export default function ChatInput({
       {/* Selektory + info */}
       <div className="mx-auto mt-3 flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 sm:px-8 text-xs text-zinc-400">
         <MythologySelector
-          mythologies={mythologies}
+          //mythologies={mythologies}
           currentMythologyId={currentMythologyId}
           currentGodId={currentGodId}
           onSelectionChange={onSelectionChange}

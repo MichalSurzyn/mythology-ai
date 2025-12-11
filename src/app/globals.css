@@ -37,9 +37,7 @@
    ======================================== */
 @layer base {
   /* Wszystkie elementy transparent domyślnie */
-  *,
-  *::before,
-  *::after {
+  * {
     background-color: transparent;
   }
 
@@ -48,16 +46,22 @@
     @apply bg-black text-white;
   }
 
-  /* Formularz elementy - muszą mieć tło dla widoczności */
+  /* Formularze - solidne tło dla czytelności */
   input:not([type='checkbox']):not([type='radio']),
   textarea,
-  select {
-    @apply bg-zinc-900 text-white;
+  select,
+  button[type='submit'],
+  [role='dialog'],
+  [role='menu'],
+  [data-dialog] {
+    background-color: inherit; /* Dziedziczą z rodzica */
   }
 
-  /* Przyciski - jeśli chcemy solidne tło */
-  button {
-    /* Domyślnie transparent, stylujemy per komponent */
+  /* Sidebar, modals - wymagają tła */
+  aside,
+  nav,
+  [role='navigation'] {
+    background-color: inherit;
   }
 }
 
@@ -65,14 +69,14 @@
    UTILITIES
    ======================================== */
 @layer utilities {
-  /* Ukrywanie scrollbara dla Chrome, Safari i Opera */
+  /* Ukrywanie scrollbara */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
   /* Ukrywanie scrollbara dla IE, Edge i Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   /* Akcent utilities */

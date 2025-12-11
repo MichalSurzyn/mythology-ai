@@ -1,4 +1,3 @@
-import { getMythologies } from '@lib/supabase/queries/mythologies'
 import ChatContainer from '@/components/chat/ChatContainer'
 import React from 'react'
 
@@ -11,7 +10,7 @@ export default async function ChatPage({ params, searchParams }: Props) {
   const { sessionId } = await params
   const search = await searchParams
 
-  const mythologies = await getMythologies().catch(() => [])
+  // ✅ Nie fetchujemy mythologies - dane są już w ThemeContext!
 
   // Wyciągnij parametry
   const initialQuery = typeof search.q === 'string' ? search.q : undefined
@@ -22,7 +21,6 @@ export default async function ChatPage({ params, searchParams }: Props) {
   return (
     <ChatContainer
       sessionId={sessionId}
-      mythologies={mythologies}
       initialQuery={initialQuery}
       mythologyId={mythologyId}
       godId={godId}

@@ -89,7 +89,7 @@ export default function StartChatInput() {
       className="flex h-full w-full flex-col justify-end"
     >
       {/* Greeting Message */}
-      <div className="flex flex-1 flex-col items-center text-accent justify-center px-4 pb-10">
+      <div className="flex flex-1 flex-col items-center justify-center px-4 pb-10">
         {greetingMessage && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -134,7 +134,6 @@ export default function StartChatInput() {
               Konfiguracja sesji
             </div>
             <MythologySelector
-              mythologies={mythologies}
               currentMythologyId={selectedMythology}
               currentGodId={selectedGod}
               onSelectionChange={handleSelectionChange}
