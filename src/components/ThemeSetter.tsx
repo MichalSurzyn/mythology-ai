@@ -3,6 +3,7 @@
 
 import { useEffect } from 'react'
 import { useTheme } from '@lib/contexts/ThemeContext'
+import { hexToHue } from '@lib/utils/hexToHue'
 
 interface ThemeSetterProps {
   mythologyId: string
@@ -14,11 +15,20 @@ interface ThemeSetterProps {
  * Używany na stronach SSR (mythology/god pages)
  */
 export default function ThemeSetter({ mythologyId, godId }: ThemeSetterProps) {
-  const { setAccent } = useTheme()
+  const { setAccent, accentColor } = useTheme()
 
   useEffect(() => {
     setAccent(mythologyId, godId)
   }, [mythologyId, godId, setAccent])
 
   return null // Nie renderuje nic - tylko efekt uboczny
+}
+
+/**
+ * Hook do pobierania HUE (0-360) z aktualnego accent color
+ * Używa ThemeContext - musi być w ThemeProvider
+ */
+export function useGalaxyHue(): number {
+  const { accentColor } = useTheme()
+  return hexToHue(accentColor)
 }

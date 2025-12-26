@@ -35,6 +35,7 @@ uniform float uRepulsionStrength;
 uniform float uMouseActiveFactor;
 uniform float uAutoCenterRepulsion;
 uniform bool uTransparent;
+uniform bool uMonoColor;
 
 varying vec2 vUv;
 
@@ -96,15 +97,27 @@ vec3 StarLayer(vec2 uv) {
       float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));
       float flareSize = smoothstep(0.9, 1.0, size) * glossLocal;
 
-      float red = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 1.0)) + STAR_COLOR_CUTOFF;
-      float blu = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 3.0)) + STAR_COLOR_CUTOFF;
-      float grn = min(red, blu) * seed;
-      vec3 base = vec3(red, grn, blu);
+      vec3 base;
+      if (uMonoColor) {
+        base = vec3(1.0);
+      } else {
+        float red = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 1.0)) + STAR_COLOR_CUTOFF;
+        float blu = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 3.0)) + STAR_COLOR_CUTOFF;
+        float grn = min(red, blu) * seed;
+        base = vec3(red, grn, blu);
+      }
       
-      float hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;
-      hue = fract(hue + uHueShift / 360.0);
-      float sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;
-      float val = max(max(base.r, base.g), base.b);
+      float hue, sat, val;
+      if (uMonoColor) {
+        hue = uHueShift / 360.0;
+        sat = uSaturation;
+        val = 1.0;
+      } else {
+        hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;
+        hue = fract(hue + uHueShift / 360.0);
+        sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;
+        val = max(max(base.r, base.g), base.b);
+      }
       base = hsv2rgb(vec3(hue, sat, val));
 
       vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;
@@ -170,7 +183,7 @@ void main() {
 }
 `
 
-interface GalaxyProps {
+export interface GalaxyProps {
   focal?: [number, number]
   rotation?: [number, number]
   starSpeed?: number
@@ -187,6 +200,7 @@ interface GalaxyProps {
   repulsionStrength?: number
   autoCenterRepulsion?: number
   transparent?: boolean
+  monoColor?: boolean
 }
 
 export default function Galaxy({
@@ -194,18 +208,19 @@ export default function Galaxy({
   rotation = [1.0, 0.0],
   starSpeed = 0.5,
   density = 1,
-  hueShift = 140,
+  hueShift = 240,
   disableAnimation = false,
   speed = 1.0,
   mouseInteraction = true,
-  glowIntensity = 0.3,
-  saturation = 0.0,
-  mouseRepulsion = true,
+  glowIntensity = 0.5,
+  saturation = 1,
+  mouseRepulsion = false,
   repulsionStrength = 2,
-  twinkleIntensity = 0.3,
+  twinkleIntensity = 0.2,
   rotationSpeed = 0.1,
   autoCenterRepulsion = 0,
   transparent = true,
+  monoColor = true,
   ...rest
 }: GalaxyProps) {
   const ctnDom = useRef<HTMLDivElement>(null)
@@ -281,6 +296,7 @@ export default function Galaxy({
         uMouseActiveFactor: { value: 0.0 },
         uAutoCenterRepulsion: { value: autoCenterRepulsion },
         uTransparent: { value: transparent },
+        uMonoColor: { value: monoColor },
       },
     })
 
@@ -356,6 +372,7 @@ export default function Galaxy({
     repulsionStrength,
     autoCenterRepulsion,
     transparent,
+    monoColor,
   ])
 
   return <div ref={ctnDom} className="w-full h-full relative" {...rest} />

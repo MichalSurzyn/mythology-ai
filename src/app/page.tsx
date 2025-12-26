@@ -2,19 +2,18 @@
 import HeroSection from '@/components/landing/HeroSection'
 import StartChatInput from '@/components/landing/StartChatInput'
 import ScrollDownIndicator from '@/components/landing/ScrollDownIndicator'
-import Galaxy from '@/components/backgrounds/Galaxy'
+import GalaxyThemed from '@/components/backgrounds/GalaxyThemed'
 import React from 'react'
 
 export const revalidate = 3600
 
 export default function LandingPage() {
-  // ✅ Nie fetchujemy - dane są już w ThemeContext z layout!
   return (
     <main className="flex min-h-screen w-full flex-col">
       {/* Hero Section */}
       {/* TŁO GALAXY - Pozycjonowane absolutnie pod spodem */}
       <div className="absolute inset-0 z-0 min-h-[200vh] w-full overflow-hidden">
-        <Galaxy />
+        <GalaxyThemed />
       </div>
       <section className="relative flex min-h-screen w-full flex-col items-center justify-center px-6 bg-gradient-to-b from-black to-transparent z-10">
         <HeroSection />
