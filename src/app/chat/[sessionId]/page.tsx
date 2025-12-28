@@ -1,4 +1,5 @@
 import ChatContainer from '@/components/chat/ChatContainer'
+import GalaxyThemed from '@/components/backgrounds/GalaxyThemed'
 import React from 'react'
 
 type Props = {
@@ -19,11 +20,21 @@ export default async function ChatPage({ params, searchParams }: Props) {
   const godId = typeof search.god === 'string' ? search.god : undefined
 
   return (
-    <ChatContainer
-      sessionId={sessionId}
-      initialQuery={initialQuery}
-      mythologyId={mythologyId}
-      godId={godId}
-    />
+    <>
+      {/* TŁO GALAXY */}
+      <div className="fixed inset-0 z-0 w-full h-full overflow-hidden">
+        <GalaxyThemed />
+      </div>
+
+      {/* CHAT CONTENT */}
+      <div className="relative z-10">
+        <ChatContainer
+          sessionId={sessionId}
+          initialQuery={initialQuery}
+          mythologyId={mythologyId}
+          godId={godId}
+        />
+      </div>
+    </>
   )
 }
