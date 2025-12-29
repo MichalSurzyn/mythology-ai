@@ -9,11 +9,13 @@ import React from 'react'
 interface MessagesAreaProps {
   messages: any[]
   isLoading: boolean
+  godName?: string | null // ✅ NOWE: Przekaż nazwę boga
 }
 
 export default function MessagesArea({
   messages,
   isLoading,
+  godName,
 }: MessagesAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -27,7 +29,11 @@ export default function MessagesArea({
         {/* Wiadomości */}
         <AnimatePresence>
           {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+            <MessageBubble
+              key={message.id}
+              message={message}
+              godName={godName} // ✅ Przekaż godName
+            />
           ))}
         </AnimatePresence>
 

@@ -1,6 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import AnimatedBorder from './AnimatedBorder'
+import { useTheme } from '@lib/contexts/ThemeContext'
 import React from 'react'
 
 type Message = {
@@ -12,10 +14,22 @@ type Message = {
 
 interface MessageBubbleProps {
   message: Message
+  godName?: string | null
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({
+  message,
+  godName,
+}: MessageBubbleProps) {
   const isUser = message.role === 'user'
+  const { accentColor } = useTheme()
+
+  // ========================================
+  // Electric border TYLKO dla Thor i Zeus
+  // ========================================
+  const isElectricGod =
+    godName && ['thor', 'zeus'].includes(godName.toLowerCase())
+  const borderType = isUser ? 'star' : isElectricGod ? 'electric' : 'star'
 
   return (
     <motion.div
@@ -25,21 +39,30 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       transition={{ duration: 0.3 }}
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
-      <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-          isUser ? 'bg-accent text-white' : 'bg-zinc-800 text-gray-100'
-        }`}
+      <AnimatedBorder
+        type={borderType}
+        className="max-w-[80%]"
+        accentColor={accentColor}
       >
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">
-          {message.content}
-        </p>
-        <p className="mt-1 text-xs opacity-60">
-          {new Date(message.timestamp).toLocaleTimeString('pl-PL', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </p>
-      </div>
+        <div
+          className="rounded-2xl px-4 py-3 backdrop-blur-sm"
+          style={{
+            backgroundColor: isUser
+              ? 'rgba(var(--accent-rgb), 0.15)'
+              : 'rgba(39, 39, 42, 0.5)',
+          }}
+        >
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-100">
+            {message.content}
+          </p>
+          <p className="mt-1 text-xs opacity-60 text-gray-300">
+            {new Date(message.timestamp).toLocaleTimeString('pl-PL', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        </div>
+      </AnimatedBorder>
     </motion.div>
   )
 }

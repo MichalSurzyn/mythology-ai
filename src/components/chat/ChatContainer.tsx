@@ -391,7 +391,11 @@ export default function ChatContainer({
     <div className="flex h-screen w-full flex-col pt-20">
       <div className="flex-1 w-full overflow-y-auto no-scrollbar">
         <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-end">
-          <MessagesArea messages={session.messages} isLoading={isLoading} />
+          <MessagesArea
+            messages={session.messages}
+            isLoading={isLoading}
+            godName={session.godName} // ✅ Przekaż godName
+          />
         </div>
       </div>
 
