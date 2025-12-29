@@ -1,2 +1,0 @@
-po rozpoczeciu czatu zrób refresh sidebaru
-wygląd czatu?

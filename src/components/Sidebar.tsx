@@ -23,7 +23,7 @@ interface SidebarProps {
 
 export function Sidebar({ mythologies }: SidebarProps) {
   const router = useRouter()
-  const { setAccent } = useTheme() // 👈 Hook do zmiany koloru
+  const { setAccent } = useTheme()
   const [expanded, setExpanded] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [chatSessions, setChatSessions] = useState<any[]>([])
@@ -58,16 +58,32 @@ export function Sidebar({ mythologies }: SidebarProps) {
   }
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen)
+    const newState = !isOpen
+    setIsOpen(newState)
+
+    // ✅ Odśwież sesje gdy otwierasz sidebar
+    if (newState) {
+      loadSessions()
+    }
   }
 
   const handleLoadSession = async (session: any) => {
     // Ustaw kolor przed przekierowaniem
-    await setAccent(
-      session.mythologyId || session.mythology_id,
-      session.godId || session.god_id
-    )
-    router.push(`/chat/${session.id}`)
+    const mythId = session.mythologyId || session.mythology_id
+    const gId = session.godId || session.god_id
+
+    await setAccent(mythId, gId)
+
+    // ========================================
+    // ✅ FIX: Zawsze dodaj parametry mythology i god do URL
+    // Dzięki temu ChatContainer wie co ładować nawet bez DB query
+    // ========================================
+    const params = new URLSearchParams({
+      mythology: mythId,
+      ...(gId && { god: gId }),
+    })
+
+    router.push(`/chat/${session.id}?${params.toString()}`)
     setIsOpen(false)
   }
 

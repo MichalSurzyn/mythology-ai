@@ -49,70 +49,133 @@ export default function ChatContainer({
 }: ChatContainerProps) {
   const router = useRouter()
   const { user } = useAuth()
-  const { setAccent } = useTheme() // 👈 Nowy hook!
+  const { setAccent } = useTheme()
   const [session, setSession] = useState<ChatSession | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const initialQuerySent = useRef(false)
 
-  // Załaduj lub stwórz sesję
+  // ========================================
+  // ZAŁADUJ LUB STWÓRZ SESJĘ
+  // ========================================
   useEffect(() => {
     async function loadSession() {
-      const [parsedMythId, parsedGodIdRaw] = sessionId.split('_')
-      const parsedGodId =
-        parsedGodIdRaw && parsedGodIdRaw !== 'mythology' ? parsedGodIdRaw : null
-
-      let mythologyIdToUse = mythologyId ?? parsedMythId
-      let godIdToUse = godId ?? parsedGodId
+      console.log('🚀 loadSession START')
+      console.log('📦 sessionId:', sessionId)
+      console.log('📦 mythologyId param:', mythologyId)
+      console.log('📦 godId param:', godId)
+      console.log('👤 user:', user?.id)
 
       try {
-        let existingSession: ChatSession | null = null
+        let mythologyIdToUse = mythologyId
+        let godIdToUse = godId === 'mythology' ? null : godId
 
-        if (user) {
+        // ========================================
+        // KROK 1: Sprawdź format sessionId
+        // ========================================
+        const isUUID =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            sessionId
+          )
+        console.log('🔍 isUUID:', isUUID)
+
+        if (isUUID && user) {
+          console.log('✅ UUID detected + user logged in - searching in DB')
+          // ========================================
+          // ZALOGOWANY - ładuj z DB po UUID
+          // ========================================
           const dbSessions = await getUserSessions(user.id)
+          console.log('📚 DB sessions count:', dbSessions.length)
+
           const found = dbSessions.find((s) => s.id === sessionId)
+          console.log('🔎 Found session:', found ? 'YES' : 'NO')
+
           if (found) {
-            mythologyIdToUse = mythologyIdToUse ?? found.mythology_id
-            godIdToUse = godIdToUse ?? found.god_id ?? null
-            const mythology = mythologyIdToUse
-              ? await getMythologyById(mythologyIdToUse)
-              : null
+            console.log('✅ Loading session from DB:', found.id)
+            const mythology = await getMythologyById(found.mythology_id)
+
+            // ✅ FIX: Nie fetch god jeśli god_id jest NULL
             const god = found.god_id ? await getGodById(found.god_id) : null
 
-            existingSession = {
+            const loadedSession: ChatSession = {
               id: found.id,
-              mythologyId: mythologyIdToUse || found.mythology_id,
+              mythologyId: found.mythology_id,
               mythologyName: mythology?.name || 'Mitologia',
               godId: found.god_id,
               godName: god?.name || null,
               messages: found.messages || [],
               createdAt: found.created_at,
             }
+
+            setSession(loadedSession)
+            await setAccent(loadedSession.mythologyId, loadedSession.godId)
+            console.log('✅ Session loaded successfully')
+            return
           }
-        } else {
-          const localSession = getSession(sessionId)
-          if (localSession) {
-            existingSession = localSession
-            mythologyIdToUse = mythologyIdToUse ?? localSession.mythologyId
-            godIdToUse = godIdToUse ?? localSession.godId ?? null
-          }
+
+          console.log('⚠️ Session not found in DB, will create new')
         }
 
-        if (existingSession) {
-          setSession(existingSession)
-          // Ustaw kolor akcentu
-          await setAccent(existingSession.mythologyId, existingSession.godId)
-          return
+        // ========================================
+        // KROK 2: Parsuj sessionId (dla niezalogowanych lub nowych sesji)
+        // ========================================
+        console.log('🔄 Parsing sessionId for mythology/god info')
+
+        if (sessionId.startsWith('mythology_')) {
+          // Format: "mythology_mythId"
+          mythologyIdToUse = sessionId.replace('mythology_', '')
+          godIdToUse = null
+          console.log('📖 Mythology-only chat detected:', mythologyIdToUse)
+        }
+        // ✅ Usunięto check UUID bez parametrów - może przyjść z sidebara przed załadowaniem usera
+
+        // Fallback do parametrów URL
+        if (!mythologyIdToUse && mythologyId) {
+          mythologyIdToUse = mythologyId
+          console.log('📝 Using mythologyId from URL param:', mythologyIdToUse)
+        }
+        if (!godIdToUse && godId && godId !== 'mythology') {
+          godIdToUse = godId
+          console.log('📝 Using godId from URL param:', godIdToUse)
         }
 
         if (!mythologyIdToUse) {
-          setError('Nie udało się odnaleźć sesji. Wróć do wyboru mitologii.')
-          router.replace('/')
+          console.error('❌ No mythologyId found!')
+          setError('Nie udało się załadować sesji.')
           return
         }
 
+        console.log(
+          '📋 Final IDs - mythology:',
+          mythologyIdToUse,
+          'god:',
+          godIdToUse
+        )
+
+        // ========================================
+        // KROK 3: Sprawdź localStorage (dla niezalogowanych)
+        // ========================================
+        if (!user) {
+          console.log('👤 User not logged in, checking localStorage')
+          const localSession = getSession(sessionId)
+          if (localSession) {
+            console.log('✅ Session found in localStorage')
+            setSession(localSession)
+            await setAccent(localSession.mythologyId, localSession.godId)
+            return
+          }
+          console.log('⚠️ No session in localStorage, creating new')
+        }
+
+        // ========================================
+        // KROK 4: Stwórz nową sesję
+        // ========================================
+        console.log('🆕 Creating new session')
         const mythology = await getMythologyById(mythologyIdToUse)
         const god = godIdToUse ? await getGodById(godIdToUse) : null
+
+        console.log('✅ Mythology loaded:', mythology?.name)
+        console.log('✅ God loaded:', god?.name || 'None (mythology chat)')
 
         const newSession: ChatSession = {
           id: sessionId,
@@ -125,38 +188,52 @@ export default function ChatContainer({
         }
 
         setSession(newSession)
-
-        // Ustaw kolor akcentu
         await setAccent(newSession.mythologyId, newSession.godId)
+        console.log('✅ New session created')
 
-        if (!user) {
-          saveSession(newSession)
-        }
+        // ✅ NIE ZAPISUJ TUTAJ - zapisze się po pierwszej wiadomości
+        // Dla niezalogowanych: w sendMessage() → saveSession()
+        // Dla zalogowanych: w sendMessage() → createSession() w DB
       } catch (error) {
-        console.error('Error loading session:', error)
+        console.error('❌ Error loading session:', error)
+        setError('Błąd ładowania sesji')
       }
     }
 
     loadSession()
   }, [sessionId, mythologyId, godId, user, setAccent])
 
-  // Wyślij inicjalne zapytanie
+  // ========================================
+  // WYŚLIJ POCZĄTKOWE ZAPYTANIE (tylko raz!)
+  // ========================================
   useEffect(() => {
     if (initialQuery && session && !initialQuerySent.current) {
+      console.log('📤 Sending initial query:', initialQuery)
       initialQuerySent.current = true
+
+      // Usuń ?q= z URL po wysłaniu
+      const url = new URL(window.location.href)
+      url.searchParams.delete('q')
+      router.replace(url.pathname + url.search, { scroll: false })
+
       sendMessage(initialQuery)
     }
   }, [initialQuery, session])
 
+  // ========================================
+  // WYŚLIJ WIADOMOŚĆ
+  // ========================================
   const sendMessage = async (content: string) => {
     if (!content.trim() || !session || isLoading) return
 
     const canSend = checkRateLimit(!!user)
     if (!canSend) {
-      setError(`Limit (${user ? '2' : '1'}/min). Poczekaj.`)
+      setError(`Limit (${user ? '3' : '2'}/min). Poczekaj.`)
       setTimeout(() => setError(null), 5000)
       return
     }
+
+    console.log('📤 Sending message:', content)
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -172,21 +249,10 @@ export default function ChatContainer({
     setError(null)
 
     try {
-      if (user && session.messages.length === 0) {
-        const dbSession = await createSession(
-          user.id,
-          session.mythologyId,
-          session.godId,
-          session.godName || session.mythologyName,
-          updatedMessages
-        )
-        updatedSession.id = dbSession.id
-      } else if (user) {
-        await updateSession(session.id, updatedMessages)
-      } else {
-        saveSession(updatedSession)
-      }
-
+      // ========================================
+      // Wywołaj API czatu
+      // ========================================
+      console.log('🌐 Calling chat API')
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,9 +268,13 @@ export default function ChatContainer({
         }),
       })
 
-      if (!response.ok) throw new Error('API error')
+      if (!response.ok) {
+        console.error('❌ API response not OK:', response.status)
+        throw new Error('API error')
+      }
 
       const data = await response.json()
+      console.log('✅ AI response received')
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -217,30 +287,80 @@ export default function ChatContainer({
       const finalSession = { ...updatedSession, messages: finalMessages }
       setSession(finalSession)
 
+      // ========================================
+      // ZAPIS DO BAZY / LOCALSTORAGE
+      // ========================================
       if (user) {
-        await updateSession(finalSession.id, finalMessages)
+        console.log('👤 User logged in - saving to DB')
+        // Zalogowany - zapisz do DB
+        if (session.messages.length === 0) {
+          // Pierwsza wiadomość - stwórz sesję w DB
+          console.log('🆕 Creating new DB session')
+          const sessionName = `${
+            session.godName || session.mythologyName
+          } - ${new Date().toLocaleString('pl-PL', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}`
+
+          const dbSession = await createSession(
+            user.id,
+            session.mythologyId,
+            session.godId,
+            sessionName,
+            finalMessages
+          )
+
+          console.log('✅ DB session created:', dbSession.id)
+
+          // ✅ FIX: Zachowaj parametry przy przekierowaniu
+          const redirectUrl = `/chat/${dbSession.id}?mythology=${
+            session.mythologyId
+          }${session.godId ? `&god=${session.godId}` : ''}`
+          console.log('🔄 Redirecting to:', redirectUrl)
+
+          // Zaktualizuj lokalny state PRZED przekierowaniem
+          finalSession.id = dbSession.id
+          setSession(finalSession)
+
+          // Przekieruj z parametrami
+          router.replace(redirectUrl, { scroll: false })
+        } else {
+          // Aktualizuj istniejącą sesję
+          console.log('💾 Updating existing DB session:', session.id)
+          await updateSession(session.id, finalMessages)
+          console.log('✅ DB session updated')
+        }
       } else {
+        // Niezalogowany - zapisz do localStorage
+        console.log('💾 Saving to localStorage')
         saveSession(finalSession)
       }
     } catch (err) {
-      console.error('Chat error:', err)
+      console.error('❌ Chat error:', err)
       setError('Błąd odpowiedzi. Spróbuj ponownie.')
     } finally {
       setIsLoading(false)
     }
   }
 
+  // ========================================
+  // ZMIANA WYBORU (mitologia/bóg)
+  // ========================================
   const handleSelectionChange = async (
     mythologyId: string,
     mythologyName: string,
     godId: string | null,
     godName: string | null
   ) => {
-    // Zmień kolor akcentu natychmiast
+    console.log('🔄 Selection changed:', { mythologyId, godId })
     await setAccent(mythologyId, godId)
 
-    // Przekieruj do nowej sesji
-    const newSessionId = `${mythologyId}_${godId || 'mythology'}`
+    // Nowy sessionId
+    const newSessionId = godId ? godId : `mythology_${mythologyId}`
+    console.log('🔄 Navigating to:', newSessionId)
     router.push(
       `/chat/${newSessionId}?mythology=${mythologyId}${
         godId ? `&god=${godId}` : ''
@@ -248,6 +368,9 @@ export default function ChatContainer({
     )
   }
 
+  // ========================================
+  // LOADING STATE
+  // ========================================
   if (!session) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -256,6 +379,9 @@ export default function ChatContainer({
     )
   }
 
+  // ========================================
+  // RENDER
+  // ========================================
   return (
     <div className="flex h-screen w-full flex-col pt-20">
       <div className="flex-1 w-full overflow-y-auto no-scrollbar">

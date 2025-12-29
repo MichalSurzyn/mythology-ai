@@ -111,7 +111,7 @@ export default async function GodPage({ params }: Props) {
           {/* CTA - Czat */}
           <div className="pt-6 flex justify-center">
             <Link
-              href={`/chat/${god.mythology_id}_${god.id}?mythology=${god.mythology_id}&god=${god.id}`}
+              href={`/chat/${god.id}?mythology=${god.mythology_id}&god=${god.id}`}
               className="px-6 py-3 rounded-lg font-semibold text-black bg-accent transition hover:opacity-90"
             >
               💬 Porozmawiaj z {god.name}

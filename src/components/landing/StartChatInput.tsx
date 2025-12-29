@@ -10,7 +10,7 @@ import React from 'react'
 
 export default function StartChatInput() {
   const router = useRouter()
-  const { setAccent, mythologies } = useTheme() // ✅ Dane z Context!
+  const { setAccent, mythologies } = useTheme()
   const [input, setInput] = useState('')
   const [selectedMythology, setSelectedMythology] = useState('')
   const [selectedGod, setSelectedGod] = useState<string | null>(null)
@@ -22,7 +22,6 @@ export default function StartChatInput() {
     if (mythologies.length > 0 && !selectedMythology) {
       const random = mythologies[Math.floor(Math.random() * mythologies.length)]
       setSelectedMythology(random.id)
-      // Ustaw kolor losowej mitologii
       setAccent(random.id, null)
     }
   }, [mythologies, selectedMythology, setAccent])
@@ -47,18 +46,27 @@ export default function StartChatInput() {
   ) => {
     setSelectedMythology(mythologyId)
     setSelectedGod(godId)
-    // Zmień kolor akcentu natychmiast
     await setAccent(mythologyId, godId)
   }
 
   const handleStart = () => {
     if (!input.trim()) return
-    const sessionId = `${selectedMythology}_${selectedGod || 'mythology'}`
+
+    // ========================================
+    // NOWY FORMAT sessionId:
+    // - Z bogiem: godId
+    // - Bez boga: mythology_mythologyId
+    // ========================================
+    const sessionId = selectedGod
+      ? selectedGod
+      : `mythology_${selectedMythology}`
+
     const params = new URLSearchParams({
       q: input.trim(),
       mythology: selectedMythology,
       ...(selectedGod && { god: selectedGod }),
     })
+
     router.push(`/chat/${sessionId}?${params.toString()}`)
   }
 
