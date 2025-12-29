@@ -153,7 +153,7 @@ export default function ChatContainer({
         )
 
         // ========================================
-        // KROK 3: Sprawdź localStorage (dla niezalogowanych)
+        // KROK 3: Sprawdź localStorage (TYLKO dla niezalogowanych!)
         // ========================================
         if (!user) {
           console.log('👤 User not logged in, checking localStorage')
@@ -165,6 +165,11 @@ export default function ChatContainer({
             return
           }
           console.log('⚠️ No session in localStorage, creating new')
+        } else {
+          // ✅ ZABEZPIECZENIE: Zalogowany user NIE powinien używać localStorage
+          console.log(
+            '🔒 User logged in - skipping localStorage check (DB priority)'
+          )
         }
 
         // ========================================

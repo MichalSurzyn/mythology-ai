@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@lib/supabase/client'
+import { clearAllSessions } from '@lib/utils/localStorage'
 import type { User } from '@supabase/supabase-js'
 
 export function useAuth() {
@@ -19,7 +20,15 @@ export function useAuth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const newUser = session?.user ?? null
+
+      // ✅ NOWE: Wyczyść localStorage gdy user się loguje
+      if (newUser && !user) {
+        console.log('🧹 User logged in - clearing localStorage sessions')
+        clearAllSessions()
+      }
+
+      setUser(newUser)
       setLoading(false)
     })
 
@@ -39,11 +48,24 @@ export function useAuth() {
       email,
       password,
     })
+
+    // ✅ NOWE: Wyczyść localStorage po zalogowaniu
+    if (!error && data.user) {
+      console.log('🧹 Sign in successful - clearing localStorage sessions')
+      clearAllSessions()
+    }
+
     return { data, error }
   }
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
+
+    // ✅ OPCJONALNE: Możesz też wyczyścić przy wylogowaniu (lub nie)
+    // if (!error) {
+    //   clearAllSessions()
+    // }
+
     return { error }
   }
 
