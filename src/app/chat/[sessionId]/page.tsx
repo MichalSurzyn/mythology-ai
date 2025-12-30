@@ -22,9 +22,9 @@ export default async function ChatPage({ params, searchParams }: Props) {
   return (
     <>
       {/* TŁO GALAXY */}
-      <div className="fixed inset-0 z-0 w-full h-full overflow-hidden">
+      {/* <div className="fixed inset-0 z-0 w-full h-full overflow-hidden">
         <GalaxyThemed />
-      </div>
+      </div> */}
 
       {/* CHAT CONTENT */}
       <div className="relative z-10">

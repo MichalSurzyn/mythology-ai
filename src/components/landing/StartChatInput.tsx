@@ -145,6 +145,7 @@ export default function StartChatInput() {
               currentMythologyId={selectedMythology}
               currentGodId={selectedGod}
               onSelectionChange={handleSelectionChange}
+              openUpwards={true}
             />
           </div>
         </div>

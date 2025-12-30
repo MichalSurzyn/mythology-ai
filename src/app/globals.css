@@ -130,3 +130,28 @@ body {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ukryj scrollbar WSZĘDZIE - Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Ukryj scrollbar WSZĘDZIE - IE/Edge (legacy) */
+* {
+  -ms-overflow-style: none;
+}
+
+/* Specjalnie dla html i body */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

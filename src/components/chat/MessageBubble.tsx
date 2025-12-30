@@ -44,14 +44,7 @@ export default function MessageBubble({
         className="max-w-[80%]"
         accentColor={accentColor}
       >
-        <div
-          className="rounded-2xl px-4 py-3 backdrop-blur-sm"
-          style={{
-            backgroundColor: isUser
-              ? 'rgba(var(--accent-rgb), 0.15)'
-              : 'rgba(39, 39, 42, 0.5)',
-          }}
-        >
+        <div className="rounded-2xl px-4 py-3">
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-100">
             {message.content}
           </p>

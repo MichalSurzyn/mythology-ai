@@ -16,6 +16,7 @@ import { getMythologyById } from '@lib/supabase/queries/mythologies'
 import { getGodById } from '@lib/supabase/queries/gods'
 import { checkRateLimit } from '@lib/utils/rateLimit'
 import React from 'react'
+import MythologySelector from './MythologySelector'
 
 type Message = {
   id: string
@@ -389,13 +390,28 @@ export default function ChatContainer({
   // ========================================
   return (
     <div className="flex h-screen w-full flex-col pt-20">
-      <div className="flex-1 w-full overflow-y-auto no-scrollbar">
-        <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-end">
-          <MessagesArea
-            messages={session.messages}
-            isLoading={isLoading}
-            godName={session.godName} // ✅ Przekaż godName
-          />
+      {/* Main content - flex row layout */}
+      <div className="flex flex-1 gap-4 overflow-hidden">
+        {/* Messages area - 5/6 width */}
+        <div className="w-5/6 overflow-y-auto no-scrollbar">
+          <div className="mx-auto flex min-h-full max-w-5xl flex-col justify-end">
+            <MessagesArea
+              messages={session.messages}
+              isLoading={isLoading}
+              godName={session.godName}
+            />
+          </div>
+        </div>
+
+        {/* Mythology selector - 1/6 width, sticky at top */}
+        <div className="w-1/6  p-4 overflow-y-auto no-scrollbar">
+          <div className="sticky top-0">
+            <MythologySelector
+              currentMythologyId={session.mythologyId}
+              currentGodId={session.godId}
+              onSelectionChange={handleSelectionChange}
+            />
+          </div>
         </div>
       </div>
 

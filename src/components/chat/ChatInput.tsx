@@ -4,6 +4,7 @@
 import { useRef, useState, KeyboardEvent, useEffect } from 'react'
 import { Send, AlertCircle } from 'lucide-react'
 import MythologySelector from '@/components/chat/MythologySelector'
+import { useTheme } from '@lib/contexts/ThemeContext'
 import React from 'react'
 
 interface ChatInputProps {
@@ -20,6 +21,7 @@ interface ChatInputProps {
   error: string | null
   isLoggedIn: boolean
   placeholder?: string
+  godName?: string | null // ✅ NOWE: Do określenia typu bordera
 }
 
 export default function ChatInput({
@@ -31,9 +33,11 @@ export default function ChatInput({
   error,
   isLoggedIn,
   placeholder = 'Zadaj pytanie...',
+  godName,
 }: ChatInputProps) {
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { accentColor } = useTheme()
   const disabled = isLoading
 
   // Auto-resize textarea
@@ -55,15 +59,29 @@ export default function ChatInput({
     if (!input.trim() || disabled) return
     onSend(input)
     setInput('')
-    // Reset wysokości po wysłaniu
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
   }
 
+  // Określ typ bordera (electric dla Thor/Zeus, star dla reszty)
+  const isElectricGod =
+    godName && ['thor', 'zeus'].includes(godName.toLowerCase())
+
   return (
-    // ZMIANA: Pełna szerokość, border na górze, tło dopasowane do reszty (czarne/przezroczyste)
-    <div className="w-full border-t border-zinc-800 bg-zinc-950/80 backdrop-blur-md pb-6 pt-4">
+    <div className="w-full bg-transparent backdrop-blur-md pb-6 pt-4 relative">
+      {/* ✅ STYLED TOP BORDER */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{
+          background: isElectricGod
+            ? `linear-gradient(90deg, transparent, ${accentColor}, transparent)`
+            : `linear-gradient(90deg, ${accentColor}, transparent, ${accentColor})`,
+          opacity: 0.6,
+          boxShadow: `0 0 10px ${accentColor}`,
+        }}
+      />
+
       {/* Error */}
       {error && (
         <div className="mx-auto mb-3 flex max-w-7xl items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -81,30 +99,28 @@ export default function ChatInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          // Styl minimalistyczny ("terminalowy")
-          className="flex-1 resize-none bg-transparent px-2 py-3 text-xl text-white placeholder-zinc-600 focus:outline-none focus:placeholder-zinc-500 disabled:opacity-50"
+          className="flex-1 resize-none bg-transparent px-2 py-3 text-xl text-white placeholder-zinc-600 focus:outline-none focus:placeholder-zinc-500 disabled:opacity-50 no-scrollbar"
           style={{ minHeight: '60px', maxHeight: '200px' }}
         />
 
         <button
           onClick={handleSend}
           disabled={!input.trim() || disabled}
-          className="self-end rounded-full bg-accent hover:opacity-90 p-4 text-white transition  disabled:cursor-not-allowed disabled:opacity-50 mb-1"
+          className="self-end rounded-full bg-accent hover:opacity-90 p-4 text-white transition disabled:cursor-not-allowed disabled:opacity-50 mb-1"
         >
           <Send size={24} />
         </button>
       </div>
 
       {/* Selektory + info */}
-      <div className="mx-auto mt-3 flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 sm:px-8 text-xs text-zinc-400">
+      {/* <div className="mx-auto mt-3 flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 sm:px-8 text-xs text-zinc-400">
         <MythologySelector
-          //mythologies={mythologies}
           currentMythologyId={currentMythologyId}
           currentGodId={currentGodId}
           onSelectionChange={onSelectionChange}
         />
-        <span className="text-[11px]">Limit: {isLoggedIn ? '2' : '1'}/min</span>
-      </div>
+        <span className="text-[11px]">Limit: {isLoggedIn ? '3' : '2'}/min</span>
+      </div> */}
     </div>
   )
 }

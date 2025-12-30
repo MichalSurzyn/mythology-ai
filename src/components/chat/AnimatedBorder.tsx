@@ -45,34 +45,42 @@ function StarBorder({
   children,
   className = '',
   color = 'white',
-  speed = '6s',
-  thickness = 1,
+  speed = '5s',
+  thickness = 3,
 }: StarBorderProps) {
   return (
     <div
-      className={`relative inline-block overflow-hidden rounded-2xl ${className}`}
-      style={{ padding: `${thickness}px 0` }}
+      className={`relative inline-block rounded-2xl ${className}`}
+      style={{
+        padding: `${thickness}px`,
+        overflow: 'visible', // ✅ Zmienione z 'hidden'
+      }}
     >
-      {/* Bottom moving gradient */}
-      <div
-        className="absolute w-[300%] h-[50%] opacity-70 bottom-[-11px] right-[-250%] rounded-full animate-star-movement-bottom z-0"
-        style={{
-          background: `radial-gradient(circle, ${color}, transparent 10%)`,
-          animationDuration: speed,
-        }}
-      />
+      {/* Border wrapper */}
+      <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+        {/* Bottom moving gradient */}
+        <div
+          className="absolute w-[300%] h-[50%] opacity-70 bottom-[-11px] right-[-250%] rounded-full animate-star-movement-bottom"
+          style={{
+            background: `radial-gradient(circle, ${color}, transparent 10%)`,
+            animationDuration: speed,
+          }}
+        />
 
-      {/* Top moving gradient */}
-      <div
-        className="absolute w-[300%] h-[50%] opacity-70 top-[-10px] left-[-250%] rounded-full animate-star-movement-top z-0"
-        style={{
-          background: `radial-gradient(circle, ${color}, transparent 10%)`,
-          animationDuration: speed,
-        }}
-      />
+        {/* Top moving gradient */}
+        <div
+          className="absolute w-[300%] h-[50%] opacity-70 top-[-100px] left-[-250%] rounded-full animate-star-movement-top"
+          style={{
+            background: `radial-gradient(circle, ${color}, transparent 10%)`,
+            animationDuration: speed,
+          }}
+        />
+      </div>
 
-      {/* Content */}
-      <div className="relative z-[1]">{children}</div>
+      {/* Content - PRZEZROCZYSTE TŁO */}
+      <div className="relative z-[1] rounded-2xl backdrop-blur-sm bg-black">
+        {children}
+      </div>
     </div>
   )
 }
