@@ -26,7 +26,7 @@ export default function UserButton() {
       <>
         <button
           onClick={() => setShowAuthModal(true)}
-          className="flex items-center gap-2 rounded-lg bg-accent hover:opacity-90 px-4 py-2 text-sm font-medium text-white transition"
+          className="flex items-center gap-2 rounded-lg  hover:opacity-90 px-4 py-2 text-sm font-medium text-accent transition"
         >
           <LogIn size={18} />
           <span className="hidden sm:inline">Zaloguj się</span>
@@ -47,7 +47,7 @@ export default function UserButton() {
     <div className="relative">
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition hover:border-accent"
+        className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition hover:border-accent"
       >
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold">
           {displayName[0].toUpperCase()}

@@ -38,7 +38,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose()
         setEmail('')
         setPassword('')
-        // Przekieruj na landing page
         router.push('/')
         router.refresh()
       }
@@ -52,31 +51,34 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Overlay */}
+        /* Główny kontener pozycjonujący (zamiast fixed na samym modalu) */
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay - Tło strony (ciemniejsze: bg-black/90) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/95 backdrop-blur-sm"
           />
 
-          {/* Modal */}
+          {/* Modal - Czarne tło, brak translate, position relative */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl"
+            /* Zatrzymujemy propagację kliknięcia, aby klik w modal nie zamykał go */
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-black p-6 shadow-2xl"
           >
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-2xl font-semibold text-zinc-400">
                 {mode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
               </h2>
               <button
                 onClick={onClose}
-                className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+                className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-900 hover:text-zinc-400"
               >
                 <X size={20} />
               </button>
@@ -105,7 +107,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-400 placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent [&:-webkit-autofill]:shadow-[0_0_0_1000px_#000_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]"
                   placeholder="twoj@email.com"
                 />
               </div>
@@ -120,7 +122,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-zinc-400 placeholder-zinc-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent [&:-webkit-autofill]:shadow-[0_0_0_1000px_#000_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]"
                   placeholder="••••••••"
                 />
               </div>
@@ -128,7 +130,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent hover:opacity-90 px-4 py-3 font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 font-medium text-zinc-400 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 size={18} className="animate-spin" />}
                 {mode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
@@ -150,7 +152,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </button>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   )

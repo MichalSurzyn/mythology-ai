@@ -115,7 +115,7 @@ export default function StartChatInput() {
       </div>
 
       {/* Input Area */}
-      <div className="w-full border-t border-zinc-800 bg-surface">
+      <div className="w-full border-t border-zinc-800 bg-black">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 p-6 sm:p-8">
           <div className="flex gap-4">
             <textarea
@@ -124,23 +124,23 @@ export default function StartChatInput() {
               onKeyDown={handleKeyDown}
               placeholder="Zadaj pytanie..."
               rows={1}
-              className="flex-1 resize-none px-2 py-3 text-xl text-white placeholder-zinc-600 focus:outline-none focus:placeholder-zinc-700"
-              style={{ minHeight: '60px' }}
+              className="flex-1 resize-none px-3 py-3 text-xl text-white placeholder-zinc-600 focus:outline-none focus:placeholder-zinc-700"
+              style={{ minHeight: '30px' }}
             />
             <button
               onClick={handleStart}
               disabled={!input.trim()}
-              className="self-end rounded-full bg-accent p-4 text-black transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="self-end rounded-full p-4 text-accent transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Send size={24} />
+              <Send size={20} />
             </button>
           </div>
 
           {/* Selektory */}
           <div className="flex items-center justify-between border-t border-zinc-800 pt-4">
-            <div className="text-xs uppercase tracking-widest text-zinc-500 mr-4 hidden sm:block">
+            {/* <div className="text-xs uppercase tracking-widest text-zinc-500 mr-4 hidden sm:block">
               Konfiguracja sesji
-            </div>
+            </div> */}
             <MythologySelector
               currentMythologyId={selectedMythology}
               currentGodId={selectedGod}

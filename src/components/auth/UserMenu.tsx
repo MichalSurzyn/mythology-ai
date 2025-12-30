@@ -44,17 +44,17 @@ export default function UserMenu({ user, onClose }: UserMenuProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-zinc-800 bg-zinc-900 p-2 shadow-xl"
+      className="absolute right-0 top-full mt-2 w-64 rounded-xl bg-transparent p-2 shadow-xl"
     >
       {/* User info */}
-      <div className="border-b border-zinc-800 px-3 py-3">
+      <div className="border-b border-accent px-3 py-3">
         <p className="text-sm font-medium text-white">{user.email}</p>
         <p className="text-xs text-zinc-400">Zalogowany</p>
       </div>
 
       {/* Menu items */}
       <div className="py-2">
-        <button
+        {/* <button
           onClick={onClose}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
         >
@@ -68,13 +68,13 @@ export default function UserMenu({ user, onClose }: UserMenuProps) {
         >
           <History size={16} />
           Historia czatów
-        </button>
+        </button> */}
 
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-accent transition hover:bg-red-500/10 hover:text-red-300"
         >
-          <LogOut size={16} />
+          <LogOut size={13} />
           Wyloguj się
         </button>
       </div>

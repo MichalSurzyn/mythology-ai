@@ -112,9 +112,9 @@ export default async function GodPage({ params }: Props) {
           <div className="pt-6 flex justify-center">
             <Link
               href={`/chat/${god.id}?mythology=${god.mythology_id}&god=${god.id}`}
-              className="px-6 py-3 rounded-lg font-semibold text-black bg-accent transition hover:opacity-90"
+              className="px-6 py-3 rounded-lg font-semibold text-accent transition hover:opacity-90"
             >
-              💬 Porozmawiaj z {god.name}
+              Rozpocznij czat
             </Link>
           </div>
         </div>

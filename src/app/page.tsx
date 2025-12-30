@@ -17,7 +17,7 @@ export default function LandingPage() {
       </div>
       <section className="relative flex min-h-screen w-full flex-col items-center justify-center px-6 bg-gradient-to-b from-black to-transparent z-10">
         <HeroSection />
-        <ScrollDownIndicator />
+        {/* <ScrollDownIndicator /> */}
       </section>
 
       {/* Start Chat Input - dane z Context */}

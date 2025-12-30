@@ -84,6 +84,10 @@
     color: var(--accent-color);
   }
 
+  .ring-accent {
+    --tw-ring-color: var(--accent-color);
+  }
+
   .border-accent {
     border-color: var(--accent-color);
   }
