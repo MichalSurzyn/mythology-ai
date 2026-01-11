@@ -1,9 +1,6 @@
+// lib/supabase/queries/gods.ts
 import { supabase } from '../client'
 import type { God } from './types'
-
-// =====================================================
-// QUERIES - Bogowie
-// =====================================================
 
 /**
  * Pobierz szczegóły boga po nazwie

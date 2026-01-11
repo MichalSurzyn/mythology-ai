@@ -3,6 +3,7 @@ import { getGodByName } from '@lib/supabase/queries/gods'
 import { getMythologyByName } from '@lib/supabase/queries/mythologies'
 import Link from 'next/link'
 import ThemeSetter from '@/components/ThemeSetter'
+import ThemedSVG from '@/components/ThemedSVG'
 import React from 'react'
 
 type Props = { params: Promise<{ name: string; godname: string }> }
@@ -22,21 +23,41 @@ export default async function GodPage({ params }: Props) {
 
   if (!god) return notFound()
 
-  // Pobierz mitologię dla breadcrumb
   const mythology = await getMythologyByName(decodedMythologyName).catch(
     () => null
   )
-  const accentColor = god.accent_color || mythology?.theme_color || '#FFD700'
+
+  // ✅ URL avatara (priorytet: avatar_url → icon_url → mythology fallback)
+  const avatarUrl = god.avatar_url || god.icon_url || mythology?.image_url || ''
 
   return (
     <>
-      {/* ✅ ThemeSetter ustawi kolor BOGA (priorytet) */}
       <ThemeSetter mythologyId={god.mythology_id} godId={god.id} />
 
-      <main className="min-h-screen px-6 py-16">
-        <div className="mx-auto max-w-3xl space-y-6">
+      <main className="relative min-h-screen px-6 py-16 overflow-hidden">
+        {/* ✅ LEFT AVATAR - absolute, 70% wysokości, za tekstem */}
+        {avatarUrl && (
+          <div className="hidden lg:block absolute left-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+            <ThemedSVG src={avatarUrl} alt={god.name} size="xlarge" />
+          </div>
+        )}
+
+        {/* ✅ RIGHT AVATAR - absolute, flipped, 70% wysokości */}
+        {avatarUrl && (
+          <div className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+            <ThemedSVG
+              src={avatarUrl}
+              alt={god.name}
+              size="xlarge"
+              flip={true}
+            />
+          </div>
+        )}
+
+        {/* ✅ CONTENT - z-index wyższy niż avatary */}
+        <div className="relative z-10 mx-auto max-w-4xl">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
             <Link href="/" className="hover:text-accent transition-colors">
               Strona główna
             </Link>
@@ -55,67 +76,66 @@ export default async function GodPage({ params }: Props) {
             <span className="text-gray-300">{god.name}</span>
           </div>
 
-          {/* Avatar */}
-          {god.avatar_url && (
-            <div className="flex justify-center">
-              <img
-                src={god.avatar_url}
-                alt={god.name}
-                className="h-32 w-32 rounded-full object-cover shadow-lg border-4 border-accent"
-              />
+          {/* ✅ Mobile Avatar (centered, tylko na mobile) */}
+          {avatarUrl && (
+            <div className="flex lg:hidden justify-center mb-8">
+              <ThemedSVG src={avatarUrl} alt={god.name} size="large" />
             </div>
           )}
 
-          {/* Główne informacje */}
-          <div className="space-y-2 text-center">
-            <h1 className="text-5xl font-semibold text-white">{god.name}</h1>
-            {god.title && <p className="text-xl text-accent">{god.title}</p>}
-            {god.entity_type && god.entity_type !== 'god' && (
-              <span className="inline-block px-3 py-1 text-sm rounded-full bg-accent-20 text-accent">
-                {god.entity_type.charAt(0).toUpperCase() +
-                  god.entity_type.slice(1)}
-              </span>
+          {/* Content */}
+          <div className="space-y-6 text-center lg:text-left">
+            {/* Główne informacje */}
+            <div className="space-y-2">
+              <h1 className="text-5xl font-semibold text-white">{god.name}</h1>
+              {god.title && <p className="text-xl text-accent">{god.title}</p>}
+              {god.entity_type && god.entity_type !== 'god' && (
+                <span className="inline-block px-3 py-1 text-sm rounded-full bg-accent-20 text-accent">
+                  {god.entity_type.charAt(0).toUpperCase() +
+                    god.entity_type.slice(1)}
+                </span>
+              )}
+            </div>
+
+            {/* Domena */}
+            {god.domain && (
+              <div className="rounded-lg border-2 border-accent bg-accent-10 p-4">
+                <p className="text-sm font-semibold text-white">Domena</p>
+                <p className="mt-1 text-lg text-gray-200">{god.domain}</p>
+              </div>
             )}
-          </div>
 
-          {/* Domena */}
-          {god.domain && (
-            <div className="rounded-lg border-2 border-accent bg-accent-10 p-4">
-              <p className="text-sm font-semibold text-white">Domena</p>
-              <p className="mt-1 text-lg text-gray-200">{god.domain}</p>
+            {/* Opis */}
+            {god.description && (
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">
+                  O tej postaci
+                </h2>
+                <p className="text-lg leading-7 text-gray-300">
+                  {god.description}
+                </p>
+              </div>
+            )}
+
+            {/* Osobowość */}
+            {god.personality && (
+              <div className="space-y-2">
+                <h2 className="text-2xl font-semibold text-white">Osobowość</h2>
+                <p className="text-lg leading-7 text-gray-300">
+                  {god.personality}
+                </p>
+              </div>
+            )}
+
+            {/* CTA */}
+            <div className="pt-6 flex justify-center lg:justify-start">
+              <Link
+                href={`/chat/${god.id}?mythology=${god.mythology_id}&god=${god.id}`}
+                className="px-6 py-3 rounded-lg font-semibold bg-accent text-black hover:opacity-90 transition"
+              >
+                💬 Rozpocznij czat z {god.name}
+              </Link>
             </div>
-          )}
-
-          {/* Opis */}
-          {god.description && (
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-white">
-                O tej postaci
-              </h2>
-              <p className="text-lg leading-7 text-gray-300">
-                {god.description}
-              </p>
-            </div>
-          )}
-
-          {/* Osobowość */}
-          {god.personality && (
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-white">Osobowość</h2>
-              <p className="text-lg leading-7 text-gray-300">
-                {god.personality}
-              </p>
-            </div>
-          )}
-
-          {/* CTA - Czat */}
-          <div className="pt-6 flex justify-center">
-            <Link
-              href={`/chat/${god.id}?mythology=${god.mythology_id}&god=${god.id}`}
-              className="px-6 py-3 rounded-lg font-semibold text-accent transition hover:opacity-90"
-            >
-              Rozpocznij czat
-            </Link>
           </div>
         </div>
       </main>

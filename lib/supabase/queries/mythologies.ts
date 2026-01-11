@@ -1,3 +1,4 @@
+// lib/supabase/queries/mythologies.ts
 import { supabase } from '@lib/supabase/client'
 import { Mythology, MythologyWithGods } from './types'
 
@@ -29,6 +30,7 @@ export async function getMythologiesWithGods(): Promise<MythologyWithGods[]> {
         system_prompt,
         accent_color,
         avatar_url,
+        icon_url,
         created_at
       )
     `

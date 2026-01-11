@@ -3,6 +3,7 @@ import { getMythologyByName } from '@lib/supabase/queries/mythologies'
 import { getGodsByMythologyId } from '@lib/supabase/queries/gods'
 import Link from 'next/link'
 import ThemeSetter from '@/components/ThemeSetter'
+import GodIcon from '@/components/GodIcon'
 import React from 'react'
 
 type Props = { params: Promise<{ name: string }> }
@@ -24,7 +25,6 @@ export default async function MythologyPage({ params }: Props) {
 
   return (
     <>
-      {/* ✅ ThemeSetter ustawi kolor mitologii */}
       <ThemeSetter mythologyId={mythology.id} />
 
       <main className="min-h-screen px-6 py-16">
@@ -75,16 +75,15 @@ export default async function MythologyPage({ params }: Props) {
                       className="group rounded-lg border border-gray-700 bg-card p-4 shadow-sm transition hover:shadow-lg hover:border-accent"
                     >
                       <div className="flex items-start gap-3">
-                        {god.avatar_url && (
-                          <img
-                            src={god.avatar_url}
-                            alt={god.name}
-                            className="h-12 w-12 rounded-full object-cover"
-                            style={{
-                              border: `2px solid ${godAccent}`,
-                            }}
-                          />
-                        )}
+                        {/* ✅ IKONA BOGA */}
+                        <GodIcon
+                          iconUrl={god.icon_url}
+                          godName={god.name}
+                          accentColor={godAccent}
+                          size="medium"
+                          className="flex-shrink-0"
+                        />
+
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-white transition-colors group-hover:text-accent">
                             {god.name}

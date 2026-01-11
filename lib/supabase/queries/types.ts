@@ -1,6 +1,4 @@
-// =====================================================
-// TYPY
-// =====================================================
+// lib/supabase/queries/types.ts
 
 export type God = {
   id: string
@@ -14,6 +12,7 @@ export type God = {
   system_prompt: string | null
   accent_color: string | null
   avatar_url: string | null
+  icon_url: string | null // ✅ DODANE
   created_at: string
 }
 

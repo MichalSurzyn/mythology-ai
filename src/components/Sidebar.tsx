@@ -7,6 +7,7 @@ import { MythologyWithGods } from '@lib/supabase/queries/types'
 import { ChevronDown, Menu, X, History, Trash2 } from 'lucide-react'
 import { useAuth } from '@lib/hooks/useAuth'
 import { useTheme } from '@lib/contexts/ThemeContext'
+import GodIcon from '@/components/GodIcon'
 import {
   getAllSessions,
   deleteSession as deleteLocalSession,
@@ -61,23 +62,17 @@ export function Sidebar({ mythologies }: SidebarProps) {
     const newState = !isOpen
     setIsOpen(newState)
 
-    // ✅ Odśwież sesje gdy otwierasz sidebar
     if (newState) {
       loadSessions()
     }
   }
 
   const handleLoadSession = async (session: any) => {
-    // Ustaw kolor przed przekierowaniem
     const mythId = session.mythologyId || session.mythology_id
     const gId = session.godId || session.god_id
 
     await setAccent(mythId, gId)
 
-    // ========================================
-    // ✅ FIX: Zawsze dodaj parametry mythology i god do URL
-    // Dzięki temu ChatContainer wie co ładować nawet bez DB query
-    // ========================================
     const params = new URLSearchParams({
       mythology: mythId,
       ...(gId && { god: gId }),
@@ -116,7 +111,7 @@ export function Sidebar({ mythologies }: SidebarProps) {
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Sidebar z animacją Framer Motion */}
+      {/* Sidebar z animacją */}
       <AnimatePresence>
         {isOpen && (
           <motion.aside
@@ -124,13 +119,12 @@ export function Sidebar({ mythologies }: SidebarProps) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{
-              duration: 0.3, // ⚙️ ZMIEŃ TUTAJ - 0.4s (możesz dać 0.5, 0.6 itd.)
+              duration: 0.3,
               ease: 'easeOut',
             }}
             className="fixed left-0 top-0 z-40 h-full w-64 bg-black text-white shadow-md"
           >
             <nav className="flex h-full flex-col overflow-y-auto p-4 pt-16">
-              {/* Reszta sidebara bez zmian... */}
               <Link href="/" className="mb-4 block">
                 <h2 className="text-lg font-semibold hover:text-accent transition-colors">
                   MythChat
@@ -173,27 +167,52 @@ export function Sidebar({ mythologies }: SidebarProps) {
                           )}
                         </div>
 
+                        {/* Lista bogów z ikonami */}
                         {expanded === mythology.id &&
                           mythology.gods.length > 0 && (
                             <ul className="ml-4 mt-1 space-y-1 border-l border-gray-700">
-                              {mythology.gods.map((god) => (
-                                <li key={god.id}>
-                                  <Link
-                                    href={`/mythologies/${encodeURIComponent(
-                                      mythology.name
-                                    )}/gods/${encodeURIComponent(god.name)}`}
-                                    className="block rounded px-2 py-1 text-sm hover:text-accent transition-colors"
-                                  >
-                                    {god.name}
-                                    {god.title && (
-                                      <span className="text-xs text-gray-400">
-                                        {' '}
-                                        ({god.title})
+                              {mythology.gods.map((god) => {
+                                // ✅ DEBUG: Sprawdź co jest w god
+                                console.log(`📊 God in Sidebar:`, {
+                                  name: god.name,
+                                  icon_url: god.icon_url,
+                                  avatar_url: god.avatar_url,
+                                  accent_color: god.accent_color,
+                                })
+
+                                return (
+                                  <li key={god.id}>
+                                    <Link
+                                      href={`/mythologies/${encodeURIComponent(
+                                        mythology.name
+                                      )}/gods/${encodeURIComponent(god.name)}`}
+                                      className="group flex items-center gap-2 rounded px-2 py-1 text-sm hover:text-accent transition-colors"
+                                    >
+                                      {/* ✅ IKONA BOGA */}
+                                      <GodIcon
+                                        iconUrl={god.icon_url}
+                                        godName={god.name}
+                                        accentColor={
+                                          god.accent_color ||
+                                          mythology.theme_color
+                                        }
+                                        size="small"
+                                        className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+                                      />
+
+                                      <span className="truncate">
+                                        {god.name}
+                                        {god.title && (
+                                          <span className="text-xs text-gray-400">
+                                            {' '}
+                                            ({god.title})
+                                          </span>
+                                        )}
                                       </span>
-                                    )}
-                                  </Link>
-                                </li>
-                              ))}
+                                    </Link>
+                                  </li>
+                                )
+                              })}
                             </ul>
                           )}
                       </li>
